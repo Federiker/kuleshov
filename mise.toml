@@ -103,6 +103,13 @@ run = "cargo llvm-cov nextest --workspace --all-features --fail-under-lines 90 -
 description = "The scripts' tests (bun test)"
 run = "bun test scripts"
 
+# Release (README, "Releasing"): plain Git, no token.
+[tasks.tag]
+description = "Set the version, commit it, tag v<version> and push them (asking at each step)"
+run = "cargo run -q -p kuleshov_tag"
+# The questions are read from the terminal.
+raw = true
+
 # What CI's Checks workflow runs, in its order: the quick checks first, so they fail fast.
 [tasks.ci]
 description = "Every check CI runs"
