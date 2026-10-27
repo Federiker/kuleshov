@@ -23,7 +23,7 @@ pub fn add_audio_to_video(
 }
 
 /// Mux audio while copying an MP4-compatible video stream without changing its frame rate.
-/// Callers must supply an already normalized video; audio is encoded once as AAC.
+/// Callers must supply an already normalised video; audio is encoded once as AAC.
 /// Supply `duration` for known frame-aligned tracks to avoid `-shortest` dropping
 /// a final copied packet while the audio encoder drains. Otherwise stop at the shorter input.
 ///

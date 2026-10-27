@@ -1,11 +1,13 @@
 # typos checks spelling in code and docs, in UK English. Every allowed word below says why it is
-# allowed. FFmpeg's own names (zoompan, anoisesrc, framemd5, color_range…) need no entry today.
+# allowed.
 
 [default]
 locale = "en-gb"
 # Other software's names, matched in context so the same words in prose are still checked: `ps -ax`
 # (scripts/process.ts).
-extend-ignore-re = ['"-ax"']
+# FFmpeg's own option names (crates/kuleshov/src): `anoisesrc=color=pink`, `amix=…:normalize=0`,
+# ffprobe's `color_range` and its siblings.
+extend-ignore-re = ['"-ax"', 'color=pink', 'normalize=0', 'color_(range|space|transfer|primaries)']
 
 [default.extend-words]
 # Names other software fixes: serde's Serialize (and `skip_serializing_if`), the sha2 crate's

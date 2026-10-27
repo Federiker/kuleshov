@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 /// Copy matching H.264 clips without fades or re-encoding.
 ///
-/// Returns `None` when normalization is needed; probe/process failures remain errors.
+/// Returns `None` when normalisation is needed; probe/process failures remain errors.
 /// Checks dimensions, frame rate, codec parameters, time base and codec extradata.
 /// Inputs must be zero-based constant-frame-rate clips, such as motion helper outputs.
 ///
@@ -122,7 +122,7 @@ pub fn concat_matching_video_files_with_cancel(
     Ok(Some(output))
 }
 
-/// Normalize and concatenate video clips into a unique silent MP4.
+/// Normalise and concatenate video clips into a unique silent MP4.
 ///
 /// `output_path` is a directory. Clips are scaled and padded to `width` by
 /// `height`, encoded at `fps`, and optionally faded between clips using
