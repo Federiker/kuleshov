@@ -1,8 +1,12 @@
-use crate::{Error, Result, Tool, Tools, process};
+use crate::{
+    Error, Result, Tool, Tools,
+    process::{self, cancelled},
+};
 use std::{
     io::Read,
     path::{Path, PathBuf},
     process::Stdio,
+    sync::atomic::AtomicBool,
 };
 
 /// Measurements of an audio file, as decoded from the file itself.
@@ -101,12 +105,28 @@ impl Meter {
 /// # Errors
 /// When ffprobe or ffmpeg cannot run or read the file, or it holds no audio; the error names the
 /// file.
+pub fn analyze_audio(tools: &Tools, path: &Path) -> Result<AudioAnalysis> {
+    analyze_audio_with_cancel(tools, path, None)
+}
+
+/// Cancellable version of [`analyze_audio`]: a long file is decoded for seconds, and `cancel` stops
+/// the decoder between two reads.
+///
+/// # Errors
+/// As [`analyze_audio`], and [`Error::Cancelled`].
 #[expect(
     clippy::cast_precision_loss,
     reason = "sample counts of an audio file are far below 2^52"
 )]
 #[expect(clippy::too_many_lines, reason = "manuzio's function, kept whole")]
-pub fn analyze_audio(tools: &Tools, path: &Path) -> Result<AudioAnalysis> {
+pub fn analyze_audio_with_cancel(
+    tools: &Tools,
+    path: &Path,
+    cancel: Option<&AtomicBool>,
+) -> Result<AudioAnalysis> {
+    if cancelled(cancel) {
+        return Err(Error::Cancelled);
+    }
     let probe = process::output(
         tools
             .command(Tool::Ffprobe)
@@ -130,6 +150,9 @@ pub fn analyze_audio(tools: &Tools, path: &Path) -> Result<AudioAnalysis> {
             .map(str::trim)
     };
 
+    if cancelled(cancel) {
+        return Err(Error::Cancelled);
+    }
     let mut command = tools.command(Tool::Ffmpeg);
     let program = PathBuf::from(command.get_program());
     let mut child = command
@@ -158,6 +181,11 @@ pub fn analyze_audio(tools: &Tools, path: &Path) -> Result<AudioAnalysis> {
     let mut buffer = vec![0u8; 1 << 16];
     let mut carry: Vec<u8> = Vec::new();
     loop {
+        if cancelled(cancel) {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(Error::Cancelled);
+        }
         let read = match stdout.read(&mut buffer) {
             Ok(read) => read,
             Err(error) => {

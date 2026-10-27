@@ -12,9 +12,10 @@ mod tools;
 mod video;
 
 pub use audio::{
-    AudioAnalysis, CombineOptions, Mp3Encoding, RoomTone, analyze_audio, audio_duration,
-    combine_audio_files, combine_audio_files_with_cancel, combine_audio_files_with_options,
-    concat_wav, concat_wav_with_cancel, place_in_slot, place_in_slot_with_cancel,
+    AudioAnalysis, CombineOptions, Mp3Encoding, RoomTone, analyze_audio, analyze_audio_with_cancel,
+    audio_duration, combine_audio_files, combine_audio_files_with_cancel,
+    combine_audio_files_with_options, concat_wav, concat_wav_with_cancel, place_in_slot,
+    place_in_slot_with_cancel,
 };
 #[cfg(feature = "tokio")]
 pub use audio::{audio_duration_async, combine_audio_files_async};

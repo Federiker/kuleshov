@@ -9,7 +9,7 @@ use super::*;
 use crate::{
     CombineOptions, Mp3Encoding, RoomTone, combine_audio_files_with_options, support::tools,
 };
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, sync::atomic::AtomicBool};
 
 /// A 24 kHz mono 16-bit WAV: `tone_secs` of a 220 Hz tone, then `silence_secs` of digital silence.
 fn wav(amplitude: f32, tone_secs: usize, silence_secs: usize) -> Vec<u8> {
@@ -202,4 +202,37 @@ fn audio_is_combined_in_a_folder_with_chinese_characters_and_apostrophes() {
         analysis.duration_secs
     );
     let _ = fs::remove_dir_all(dir);
+}
+
+#[test]
+fn an_analysis_already_cancelled_runs_nothing() {
+    // Programs that do not exist: running either would be an error of its own.
+    let tools = crate::Tools::new("kuleshov-no-ffmpeg", "kuleshov-no-ffprobe");
+    let cancel = AtomicBool::new(true);
+    let error =
+        analyze_audio_with_cancel(&tools, Path::new("chapter.wav"), Some(&cancel)).unwrap_err();
+    assert!(error.is_cancelled(), "{error}");
+}
+
+#[test]
+fn cancelling_stops_the_decoder_of_a_long_file() {
+    let dir = workspace("cancel");
+    let input = dir.join("long.wav");
+    // Twenty minutes of silence: seconds of decoding and measuring, far longer than the wait below.
+    fs::write(&input, wav(0.0, 0, 1_200)).unwrap();
+    let cancel = std::sync::Arc::new(AtomicBool::new(false));
+    let flag = cancel.clone();
+    let setter = std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(200));
+        flag.store(true, std::sync::atomic::Ordering::Relaxed);
+    });
+    let started = std::time::Instant::now();
+
+    let result = analyze_audio_with_cancel(&tools(), &input, Some(&cancel));
+
+    setter.join().unwrap();
+    assert!(result.unwrap_err().is_cancelled());
+    assert!(started.elapsed() < std::time::Duration::from_secs(5));
+    // The decoder is stopped, so its input can be removed at once (Windows keeps open files).
+    fs::remove_dir_all(dir).unwrap();
 }

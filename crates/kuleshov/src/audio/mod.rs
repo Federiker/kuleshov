@@ -5,7 +5,7 @@ mod combine;
 mod duration;
 mod slot;
 
-pub use analyze::{AudioAnalysis, analyze_audio};
+pub use analyze::{AudioAnalysis, analyze_audio, analyze_audio_with_cancel};
 #[cfg(feature = "tokio")]
 pub use combine::combine_audio_files_async;
 pub use combine::{
