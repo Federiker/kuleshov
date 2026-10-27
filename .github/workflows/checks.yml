@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: tools
-          key: ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/downloads.ts', 'scripts/tools.ts') }}
+          key: ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('crates/kuleshov/ffmpeg-builds.json', 'scripts/downloads.ts', 'scripts/tools.ts') }}
       - run: mise run tools
       # Quick checks first.
       - run: mise run fmt

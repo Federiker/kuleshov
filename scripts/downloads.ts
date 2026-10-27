@@ -1,6 +1,7 @@
 // The pinned FFmpeg downloads and their verified installation, copied from manuzio's
-// scripts/downloads.ts (`installArchive`, `ffmpegDownload`). The parity references belong to these
-// exact builds (docs/parity.md): change a URL or a checksum only with new references.
+// scripts/downloads.ts (`installArchive`, `ffmpegDownload`). The pins themselves are in
+// crates/kuleshov/ffmpeg-builds.json, which the library's `download` feature reads too; the parity
+// references belong to those exact builds (docs/parity.md).
 import { createHash } from "node:crypto";
 import {
   chmod,
@@ -8,6 +9,7 @@ import {
   mkdir,
   mkdtemp,
   readdir,
+  readFile,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -95,26 +97,29 @@ export interface ToolDownload {
   sha256: string;
 }
 
+/** The pinned builds, shared with the library's `download` feature (one manifest, one place). */
+type Builds = Record<string, ToolDownload | string>;
+const builds: Builds = JSON.parse(
+  await readFile(
+    new URL("../crates/kuleshov/ffmpeg-builds.json", import.meta.url),
+    "utf8",
+  ),
+);
+
+/** The manifest's `<os>-<arch>` key, in Rust's names, for Node's platform and architecture. */
+function buildKey(platform: string, arch: string): string {
+  const os = platform === "win32" ? "windows" : platform;
+  const cpu = arch === "x64" ? "x86_64" : arch === "arm64" ? "aarch64" : arch;
+  return `${os}-${cpu}`;
+}
+
 export function ffmpegDownload(
   platform = process.platform,
   arch = process.arch,
 ): ToolDownload {
-  if (platform === "win32" && arch === "x64")
-    return {
-      url: "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
-      sha256:
-        "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
-    };
-  if (platform === "linux" && (arch === "x64" || arch === "arm64")) {
-    return {
-      url: `https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-${arch === "x64" ? "amd64" : "arm64"}-static.tar.xz`,
-      sha256:
-        arch === "x64"
-          ? "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67"
-          : "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1",
-    };
-  }
-
+  const build = builds[buildKey(platform, arch)];
+  if (typeof build === "object")
+    return { url: build.url, sha256: build.sha256 };
   throw new Error(
     `Supply matching ffmpeg and ffprobe in tools/ for ${platform}-${arch}, or point KULESHOV_TOOLS_DIR at them; automatic downloads are not available.`,
   );

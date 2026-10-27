@@ -1,0 +1,15 @@
+{
+  "$comment": "The pinned FFmpeg builds, by `<os>-<arch>` as Rust names them: what Tools::find_or_download installs (the `download` feature) and what `mise run tools` stages for the tests (scripts/downloads.ts). The parity references belong to these exact builds (docs/parity.md): change a URL or a checksum only with new references.",
+  "windows-x86_64": {
+    "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+    "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba"
+  },
+  "linux-x86_64": {
+    "url": "https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-amd64-static.tar.xz",
+    "sha256": "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67"
+  },
+  "linux-aarch64": {
+    "url": "https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-arm64-static.tar.xz",
+    "sha256": "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1"
+  }
+}
