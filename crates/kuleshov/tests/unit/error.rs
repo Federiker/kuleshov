@@ -80,6 +80,14 @@ fn every_error_says_what_and_where() {
             Some("out"),
         ),
         (
+            Error::Download {
+                url: "https://example.org/ff.zip".to_owned(),
+                reason: "SHA-256 mismatch".to_owned(),
+            },
+            "could not install FFmpeg from https://example.org/ff.zip: SHA-256 mismatch",
+            None,
+        ),
+        (
             Error::Run {
                 program: PathBuf::from("ffmpeg"),
                 source: io(),

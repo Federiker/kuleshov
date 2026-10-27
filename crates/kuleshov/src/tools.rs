@@ -1,6 +1,6 @@
 //! Where `ffmpeg` and `ffprobe` are: the caller says (explicit paths, folders to search or a
 //! resolver), and the bare name, resolved by the system through `PATH`, is the fallback. Kuleshov
-//! never bundles, downloads or looks for FFmpeg on its own.
+//! never bundles or looks for FFmpeg on its own, and downloads it only when asked (`download`).
 
 use std::{
     fmt,

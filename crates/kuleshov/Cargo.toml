@@ -16,10 +16,31 @@ categories = ["multimedia"]
 [features]
 # The async variants (`audio_duration_async`, `combine_audio_files_async`) on Tokio's blocking pool.
 tokio = ["dep:tokio"]
+# `Tools::find_or_download`: the pinned FFmpeg build (ffmpeg-builds.json), downloaded on request.
+download = [
+  "dep:lzma-rust2",
+  "dep:serde",
+  "dep:serde_json",
+  "dep:sha2",
+  "dep:tar",
+  "dep:ureq",
+  "dep:zip",
+]
 
 [dependencies]
+lzma-rust2 = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+tar = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
+ureq = { workspace = true, optional = true }
 uuid = { workspace = true }
+zip = { workspace = true, optional = true }
 
 [dev-dependencies]
+# Tests build the archives they serve: tar.xz needs the encoder.
+lzma-rust2 = { workspace = true, features = ["encoder"] }
+tar = { workspace = true }
 tokio = { workspace = true }
+zip = { workspace = true }

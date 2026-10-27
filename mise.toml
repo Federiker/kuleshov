@@ -47,10 +47,11 @@ run = "bun scripts/stage-ffmpeg.ts"
 
 # Check.
 [tasks.check]
-description = "cargo check of the workspace, and of the library with the tokio feature"
+description = "cargo check of the workspace, and of the library with each optional feature alone"
 run = [
   "cargo check --workspace --all-targets",
   "cargo check -p kuleshov --features tokio",
+  "cargo check -p kuleshov --features download",
 ]
 
 [tasks.fmt]

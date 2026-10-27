@@ -28,6 +28,9 @@ pub enum Error {
     Probe { path: PathBuf, reason: String },
     /// A file or folder could not be created, written or read.
     Io { path: PathBuf, source: io::Error },
+    /// An FFmpeg build could not be downloaded or installed: the server, the checksum or the
+    /// archive (the `download` feature).
+    Download { url: String, reason: String },
 }
 
 /// The result of every fallible function here.
@@ -48,7 +51,9 @@ impl Error {
             | Self::Probe { path, .. }
             | Self::Io { path, .. } => Some(path),
             Self::Failed { file, .. } => file.as_deref(),
-            Self::Cancelled | Self::InvalidInput(_) | Self::Run { .. } => None,
+            Self::Cancelled | Self::InvalidInput(_) | Self::Run { .. } | Self::Download { .. } => {
+                None
+            }
         }
     }
 
@@ -114,6 +119,9 @@ impl fmt::Display for Error {
             }
             Self::Probe { path, reason } => write!(f, "{}: {reason}", path.display()),
             Self::Io { path, source } => write!(f, "{}: {source}", path.display()),
+            Self::Download { url, reason } => {
+                write!(f, "could not install FFmpeg from {url}: {reason}")
+            }
         }
     }
 }

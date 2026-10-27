@@ -2,11 +2,14 @@
 //! room tone and tags, sample-exact slots, level measurements, motion from still images, joining
 //! clips and muxing audio.
 //!
-//! The caller says where `ffmpeg` and `ffprobe` are with [`Tools`]; kuleshov never bundles,
-//! downloads or searches for them. Every function that runs them takes `&Tools` first.
+//! The caller says where `ffmpeg` and `ffprobe` are with [`Tools`]; kuleshov never bundles or
+//! searches for them, and downloads them only when asked (the `download` feature,
+//! `Tools::find_or_download`). Every function that runs them takes `&Tools` first.
 
 mod audio;
 mod concat;
+#[cfg(feature = "download")]
+mod download;
 mod error;
 mod process;
 mod tools;
@@ -20,6 +23,8 @@ pub use audio::{
 };
 #[cfg(feature = "tokio")]
 pub use audio::{audio_duration_async, combine_audio_files_async};
+#[cfg(feature = "download")]
+pub use download::FfmpegBuild;
 pub use error::{Error, Result};
 pub use process::{run_cancellable, stderr_tail};
 pub use tools::{Tool, Tools, hide_console};
