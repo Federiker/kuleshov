@@ -1,0 +1,24 @@
+[lints]
+workspace = true
+
+[package]
+name = "kuleshov_parity"
+description = "The recording shim and the parity test that keep kuleshov's output the same as manuzio's"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "kuleshov-record"
+path = "src/bin/kuleshov-record.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+
+[dev-dependencies]
+kuleshov = { workspace = true, features = ["tokio"] }
+tokio = { workspace = true }

@@ -1,0 +1,2056 @@
+{
+  "source": "manuzio 0ec8e8ede4be114c3f7d715f196a622e94c1b989",
+  "ffmpeg": "ffmpeg version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2000-2024 the FFmpeg developers",
+  "ffprobe": "ffprobe version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2007-2024 the FFmpeg developers",
+  "scenarios": [
+    {
+      "name": "audio-duration",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{work}/inputs/speech.wav"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "5.0"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "audio-duration-missing",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{work}/audio-duration-missing/chapter-07.wav"
+          ]
+        }
+      ],
+      "result": {
+        "err": "ffprobe could not read {work}/audio-duration-missing/chapter-07.wav"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "audio-duration-async",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{work}/inputs/tone-1s.wav"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "1.0"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "combine",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine/audio/{uuid1}.txt",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "2",
+            "{combine#0}"
+          ],
+          "lists": {
+            "{work}/combine/audio/{uuid1}.txt": "file '{work}/inputs/speech.wav'\nfile '{work}/inputs/tone-1s.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine#0}",
+          "bytes": 30544,
+          "sha256": "d5e5b6c414a74d70eba9d1eb65edef595d9347ef35f1a03fa29c4744b66a7449",
+          "audio_md5": "MD5=a6b8a4d0019c0e01a5146d6591cf89e0",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=44100|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=353600|duration_ts=85155840|bit_rate=40436|nb_frames=N/A",
+            "format|format_name=mp3|duration=6.034286|bit_rate=40493|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine#0}"
+      ]
+    },
+    {
+      "name": "combine-cancel",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-cancel/audio/{uuid1}.txt",
+            "-ac",
+            "1",
+            "-ar",
+            "22050",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "2",
+            "{combine-cancel#0}"
+          ],
+          "lists": {
+            "{work}/combine-cancel/audio/{uuid1}.txt": "file '{work}/inputs/tone-440-1s.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-cancel#0}",
+          "bytes": 5741,
+          "sha256": "bc0b59b5fd6da70dddebf97075545b72a9b2d7d8ccf24c315843a3a43ebbabcd",
+          "audio_md5": "MD5=587c4052e3184cf438d2ede19aa71e35",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=22050|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=707200|duration_ts=15114240|bit_rate=42554|nb_frames=N/A",
+            "format|format_name=mp3|duration=1.071020|bit_rate=42882|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-cancel#0}"
+      ]
+    },
+    {
+      "name": "combine-retail",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-retail/audio/{uuid1}.txt",
+            "-f",
+            "lavfi",
+            "-i",
+            "anoisesrc=color=pink:amplitude=0.0020417378:sample_rate=44100",
+            "-filter_complex",
+            "[0:a]aresample=44100,aformat=channel_layouts=mono,adelay=1500:all=1[voice];[voice][1:a]amix=inputs=2:duration=first:normalize=0:dropout_transition=0[mix]",
+            "-map",
+            "[mix]",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-acodec",
+            "mp3",
+            "-b:a",
+            "192k",
+            "{combine-retail#0}"
+          ],
+          "lists": {
+            "{work}/combine-retail/audio/{uuid1}.txt": "file '{work}/inputs/speech.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-retail#0}",
+          "bytes": 157404,
+          "sha256": "77d2aa0358dd09af321a1c1612a7af89e7e3a0f703ef01ef37e5bb20b8025ce9",
+          "audio_md5": "MD5=3cece02e14f7eed1f6aab7c63b55bc72",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=44100|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=353600|duration_ts=92160000|bit_rate=192000|nb_frames=N/A",
+            "format|format_name=mp3|duration=6.530612|bit_rate=192819|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-retail#0}"
+      ]
+    },
+    {
+      "name": "combine-tags",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-tags/audio/{uuid1}.txt",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "2",
+            "-metadata",
+            "comment=AI-generated narration",
+            "-metadata",
+            "AIGC={\"Label\":\"1\"}",
+            "{combine-tags#0}"
+          ],
+          "lists": {
+            "{work}/combine-tags/audio/{uuid1}.txt": "file '{work}/inputs/tone-1s.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-tags#0}",
+          "bytes": 6203,
+          "sha256": "864f19e85d28f25d7a5c3df352deceb2b99da9f9651e16e3f7ae8c126964cf0a",
+          "audio_md5": "MD5=d334f24437ec6279aef8a980706152b9",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=44100|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=353600|duration_ts=14745600|bit_rate=46604|nb_frames=N/A",
+            "format|format_name=mp3|duration=1.044898|bit_rate=47491|tag:comment=AI-generated narration|tag:AIGC={\"Label\":\"1\"}|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-tags#0}"
+      ]
+    },
+    {
+      "name": "combine-quality",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-quality/audio/{uuid1}.txt",
+            "-ac",
+            "1",
+            "-ar",
+            "24000",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "7",
+            "{combine-quality#0}"
+          ],
+          "lists": {
+            "{work}/combine-quality/audio/{uuid1}.txt": "file '{work}/inputs/speech.wav'\nfile '{work}/inputs/tone-330-half.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-quality#0}",
+          "bytes": 6884,
+          "sha256": "c609d546adf3311c0d88ca27485b0fb1edb7007aaa4e0bf50f4f01056d931cb5",
+          "audio_md5": "MD5=c85eb8196411003715175da7cdb984e4",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=24000|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=649740|duration_ts=85349376|bit_rate=9048|nb_frames=N/A",
+            "format|format_name=mp3|duration=6.048000|bit_rate=9105|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-quality#0}"
+      ]
+    },
+    {
+      "name": "combine-room-tone-vbr",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-room-tone-vbr/audio/{uuid1}.txt",
+            "-f",
+            "lavfi",
+            "-i",
+            "anoisesrc=color=pink:amplitude=0.0036307801:sample_rate=24000",
+            "-filter_complex",
+            "[0:a]aresample=24000,aformat=channel_layouts=mono,adelay=750:all=1[voice];[voice][1:a]amix=inputs=2:duration=first:normalize=0:dropout_transition=0[mix]",
+            "-map",
+            "[mix]",
+            "-ac",
+            "1",
+            "-ar",
+            "24000",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "4",
+            "-metadata",
+            "title=Chapter 1",
+            "{combine-room-tone-vbr#0}"
+          ],
+          "lists": {
+            "{work}/combine-room-tone-vbr/audio/{uuid1}.txt": "file '{work}/inputs/tone-1s.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-room-tone-vbr#0}",
+          "bytes": 11297,
+          "sha256": "2441a2e39f903e705f443c57a26c23eaa0a68fb4c8d00a9d14f6791074cd2761",
+          "audio_md5": "MD5=cc989319b6ed81921edb79ee3a433d6f",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=24000|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=649740|duration_ts=25401600|bit_rate=49920|nb_frames=N/A",
+            "format|format_name=mp3|duration=1.800000|bit_rate=50208|tag:title=Chapter 1|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-room-tone-vbr#0}"
+      ]
+    },
+    {
+      "name": "combine-chinese",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-chinese/张伟的文档/O'Brien 的书 L'été/audio/{uuid1}.txt",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "2",
+            "{combine-chinese#0}"
+          ],
+          "lists": {
+            "{work}/combine-chinese/张伟的文档/O'Brien 的书 L'été/audio/{uuid1}.txt": "file '{work}/combine-chinese/张伟的文档/O'\\''Brien 的书 L'\\''été/语音一.wav'\nfile '{work}/combine-chinese/张伟的文档/O'\\''Brien 的书 L'\\''été/语音二.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-chinese#0}",
+          "bytes": 30337,
+          "sha256": "dcb480bfd02630f540c69fbd018e52396348f7a96a7cb10b61b027023c9f458a",
+          "audio_md5": "MD5=b91c9f83381cfcb07766b110695c418c",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=44100|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=353600|duration_ts=85155840|bit_rate=40161|nb_frames=N/A",
+            "format|format_name=mp3|duration=6.034286|bit_rate=40219|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-chinese#0}",
+        "{work}/combine-chinese/张伟的文档/O'Brien 的书 L'été/语音一.wav",
+        "{work}/combine-chinese/张伟的文档/O'Brien 的书 L'été/语音二.wav"
+      ]
+    },
+    {
+      "name": "combine-async",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/combine-async/audio/{uuid1}.txt",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-acodec",
+            "mp3",
+            "-q:a",
+            "2",
+            "{combine-async#0}"
+          ],
+          "lists": {
+            "{work}/combine-async/audio/{uuid1}.txt": "file '{work}/inputs/tone-1s.wav'\nfile '{work}/inputs/speech.wav'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-async#0}",
+          "bytes": 30337,
+          "sha256": "dcb480bfd02630f540c69fbd018e52396348f7a96a7cb10b61b027023c9f458a",
+          "audio_md5": "MD5=b91c9f83381cfcb07766b110695c418c",
+          "streams": [
+            "stream|index=0|codec_name=mp3|profile=unknown|codec_type=audio|codec_tag_string=[0][0][0][0]|sample_fmt=fltp|sample_rate=44100|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/14112000|start_pts=353600|duration_ts=85155840|bit_rate=40161|nb_frames=N/A",
+            "format|format_name=mp3|duration=6.034286|bit_rate=40219|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-async#0}"
+      ]
+    },
+    {
+      "name": "combine-empty",
+      "calls": [],
+      "result": {
+        "err": "no input files provided"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "combine-cancelled",
+      "calls": [],
+      "result": {
+        "err": "ffmpeg failed to combine audio files: Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "analyze-retail",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            "stream=codec_name,bit_rate,sample_rate,channels",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{combine-retail#0}"
+          ]
+        },
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-v",
+            "error",
+            "-i",
+            "{combine-retail#0}",
+            "-f",
+            "f32le",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "AudioAnalysis { codec: \"mp3\", bit_rate: Some(192000), sample_rate: 44100, channels: 1, duration_secs: 6.5, rms_dbfs: -26.635408, peak_dbfs: -20.152843, noise_floor_dbfs: -70.05181, lead_secs: 1.5, tail_secs: 2.0 }"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "analyze-plain",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            "stream=codec_name,bit_rate,sample_rate,channels",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{combine#0}"
+          ]
+        },
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-v",
+            "error",
+            "-i",
+            "{combine#0}",
+            "-f",
+            "f32le",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "AudioAnalysis { codec: \"mp3\", bit_rate: Some(40436), sample_rate: 44100, channels: 1, duration_secs: 6.0, rms_dbfs: -24.774073, peak_dbfs: -19.980516, noise_floor_dbfs: -120.0, lead_secs: 0.0, tail_secs: 0.0 }"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "analyze-wav",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            "stream=codec_name,bit_rate,sample_rate,channels",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{work}/inputs/speech.wav"
+          ]
+        },
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-v",
+            "error",
+            "-i",
+            "{work}/inputs/speech.wav",
+            "-f",
+            "f32le",
+            "-ac",
+            "1",
+            "-ar",
+            "44100",
+            "-"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "AudioAnalysis { codec: \"pcm_s16le\", bit_rate: Some(384000), sample_rate: 24000, channels: 1, duration_secs: 5.0, rms_dbfs: -25.230825, peak_dbfs: -20.000732, noise_floor_dbfs: -120.0, lead_secs: 0.0, tail_secs: 2.0 }"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "analyze-missing",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            "stream=codec_name,bit_rate,sample_rate,channels",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{work}/analyze-missing/chapter-08.mp3"
+          ]
+        }
+      ],
+      "result": {
+        "err": "ffprobe could not read {work}/analyze-missing/chapter-08.mp3"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "slot",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{work}/inputs/tone-440-1s.wav",
+            "-af",
+            "aresample=24000,aformat=channel_layouts=mono,adelay=500,apad=whole_dur=2",
+            "-t",
+            "2",
+            "-c:a",
+            "pcm_s16le",
+            "{slot#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{slot#0}",
+          "bytes": 96078,
+          "sha256": "bc8aefc48cfe491c45e8c2a731958ab6a66af1caaeeb8e9f8107709b49958c04",
+          "audio_md5": "MD5=d20c728c1ae620b6bc0295b5acf2079b",
+          "streams": [
+            "stream|index=0|codec_name=pcm_s16le|profile=unknown|codec_type=audio|codec_tag_string=[1][0][0][0]|sample_fmt=s16|sample_rate=24000|channels=1|channel_layout=unknown|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/24000|start_pts=N/A|duration_ts=48000|bit_rate=384000|nb_frames=N/A",
+            "format|format_name=wav|duration=2.000000|bit_rate=384312|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{slot#0}"
+      ]
+    },
+    {
+      "name": "slot-overlong",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{work}/inputs/tone-440-3s.wav",
+            "-af",
+            "aresample=24000,aformat=channel_layouts=mono,adelay=0,apad=whole_dur=1",
+            "-t",
+            "1",
+            "-c:a",
+            "pcm_s16le",
+            "{slot-overlong#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{slot-overlong#0}",
+          "bytes": 48078,
+          "sha256": "4a1d8c26ce31553d8438149776575673435e6026ba93b820368245ccd084e9af",
+          "audio_md5": "MD5=628572159a9cef1fab805e80919e5ef1",
+          "streams": [
+            "stream|index=0|codec_name=pcm_s16le|profile=unknown|codec_type=audio|codec_tag_string=[1][0][0][0]|sample_fmt=s16|sample_rate=24000|channels=1|channel_layout=unknown|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/24000|start_pts=N/A|duration_ts=24000|bit_rate=384000|nb_frames=N/A",
+            "format|format_name=wav|duration=1.000000|bit_rate=384624|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{slot-overlong#0}"
+      ]
+    },
+    {
+      "name": "slot-cancel",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{work}/inputs/tone-330-half.wav",
+            "-af",
+            "aresample=24000,aformat=channel_layouts=mono,adelay=200,apad=whole_dur=1.5",
+            "-t",
+            "1.5",
+            "-c:a",
+            "pcm_s16le",
+            "{slot-cancel#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{slot-cancel#0}",
+          "bytes": 72078,
+          "sha256": "2cddc0e1ef509fb7f0afe378585832d489ff9b0fd31a92dcf66ff07173ec1820",
+          "audio_md5": "MD5=b9cc43b531a8b9cb513c19d8e2cd829d",
+          "streams": [
+            "stream|index=0|codec_name=pcm_s16le|profile=unknown|codec_type=audio|codec_tag_string=[1][0][0][0]|sample_fmt=s16|sample_rate=24000|channels=1|channel_layout=unknown|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/24000|start_pts=N/A|duration_ts=36000|bit_rate=384000|nb_frames=N/A",
+            "format|format_name=wav|duration=1.500000|bit_rate=384416|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{slot-cancel#0}"
+      ]
+    },
+    {
+      "name": "slot-zero",
+      "calls": [],
+      "result": {
+        "err": "slot length must be positive"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "slot-cancelled",
+      "calls": [],
+      "result": {
+        "err": "ffmpeg failed: Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "concat-wav",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/concat-wav/{uuid1}.txt",
+            "-ar",
+            "24000",
+            "-ac",
+            "1",
+            "-c:a",
+            "pcm_s16le",
+            "{concat-wav#0}"
+          ],
+          "lists": {
+            "{work}/concat-wav/{uuid1}.txt": "file '{slot#0}'\nfile '{slot-overlong#0}'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{concat-wav#0}",
+          "bytes": 144078,
+          "sha256": "5f697241422ee7a5e26ebe8acea49a91ad8f8826a95674cc7a5ed8db435aebfd",
+          "audio_md5": "MD5=97665f1b6e6cb20caa87c85842402cb3",
+          "streams": [
+            "stream|index=0|codec_name=pcm_s16le|profile=unknown|codec_type=audio|codec_tag_string=[1][0][0][0]|sample_fmt=s16|sample_rate=24000|channels=1|channel_layout=unknown|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/24000|start_pts=N/A|duration_ts=72000|bit_rate=384000|nb_frames=N/A",
+            "format|format_name=wav|duration=3.000000|bit_rate=384208|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{concat-wav#0}"
+      ]
+    },
+    {
+      "name": "concat-wav-cancel",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/concat-wav-cancel/{uuid1}.txt",
+            "-ar",
+            "24000",
+            "-ac",
+            "1",
+            "-c:a",
+            "pcm_s16le",
+            "{concat-wav-cancel#0}"
+          ],
+          "lists": {
+            "{work}/concat-wav-cancel/{uuid1}.txt": "file '{slot-cancel#0}'\nfile '{slot#0}'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{concat-wav-cancel#0}",
+          "bytes": 168078,
+          "sha256": "11901f91b02175accac1e9f9118506741ad2ee7d985c10ecce8eb6e7f8a74594",
+          "audio_md5": "MD5=0236c4ed0e181db06f61441a484bdf2f",
+          "streams": [
+            "stream|index=0|codec_name=pcm_s16le|profile=unknown|codec_type=audio|codec_tag_string=[1][0][0][0]|sample_fmt=s16|sample_rate=24000|channels=1|channel_layout=unknown|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/24000|start_pts=N/A|duration_ts=84000|bit_rate=384000|nb_frames=N/A",
+            "format|format_name=wav|duration=3.500000|bit_rate=384178|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{concat-wav-cancel#0}"
+      ]
+    },
+    {
+      "name": "concat-wav-empty",
+      "calls": [],
+      "result": {
+        "err": "no input files provided"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "concat-wav-cancelled",
+      "calls": [],
+      "result": {
+        "err": "ffmpeg failed: Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "motion-zoom-in",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/portrait.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1+(1.25-1)*on/9':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=10:s=90x160:fps=10",
+            "-frames:v",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-zoom-in#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-zoom-in#0}",
+          "bytes": 100733,
+          "sha256": "6eec0b2054f5557b601a6ba6ec79970695e3fbbecf917c631c0a437fa8744960",
+          "video_framemd5": "7b425c386108cce293c1d6c94853dfc8660f75e671eae5d486086355df871dfb",
+          "frames": 10,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=10240|bit_rate=798112|nb_frames=10|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=805864|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-zoom-in#0}"
+      ]
+    },
+    {
+      "name": "motion-zoom-out",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/portrait.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.25-(1.25-1)*on/9':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=10:s=90x160:fps=10",
+            "-frames:v",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-zoom-out#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-zoom-out#0}",
+          "bytes": 94493,
+          "sha256": "b8245635ec4b201ad6e393223920d20a2a8095d8411fa6db6b2b22a335bbb9ad",
+          "video_framemd5": "e8da02fe926e680f6bea2296702c320b8b589b556f326fa9056956be4c0f5b8f",
+          "frames": 10,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=10240|bit_rate=748000|nb_frames=10|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=755944|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-zoom-out#0}"
+      ]
+    },
+    {
+      "name": "motion-left-to-right",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/portrait.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.1':x='(iw-iw/zoom)*on/9':y='(ih-ih/zoom)/2':d=10:s=90x160:fps=10",
+            "-frames:v",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-left-to-right#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-left-to-right#0}",
+          "bytes": 66532,
+          "sha256": "93a0d6ee8b2e9146f8e087e4964c9a4f28413c053f0bbe61b4dc955cf569647a",
+          "video_framemd5": "e79edb4b707519696ef83495cc91571f17a39ff68a3446f878e607e62b55dfa6",
+          "frames": 10,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=10240|bit_rate=524376|nb_frames=10|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=532256|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-left-to-right#0}"
+      ]
+    },
+    {
+      "name": "motion-right-to-left",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/portrait.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.1':x='(iw-iw/zoom)*(1-on/9)':y='(ih-ih/zoom)/2':d=10:s=90x160:fps=10",
+            "-frames:v",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-right-to-left#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-right-to-left#0}",
+          "bytes": 67667,
+          "sha256": "6075dc4e84723978d0a679b207ad6e7286b86fc4186003c4b4fe8ba44d63585f",
+          "video_framemd5": "37e52bd348b13d6f38949b59fd1189b548ac7bd9fdb9194ffddf16b3f0067c81",
+          "frames": 10,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=10240|bit_rate=533456|nb_frames=10|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=541336|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-right-to-left#0}"
+      ]
+    },
+    {
+      "name": "motion-landscape-pan",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "30",
+            "-i",
+            "{work}/inputs/landscape.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.3':x='(iw-iw/zoom)*on/29':y='(ih-ih/zoom)/2':d=30:s=90x160:fps=30",
+            "-frames:v",
+            "30",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-landscape-pan#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-landscape-pan#0}",
+          "bytes": 112053,
+          "sha256": "ce01c47e383e66de04e62f0c71d1740f5b517d35c9ad785fcbdb78bdef27437e",
+          "video_framemd5": "94c2a2c890b55a9ac77b98c8664f2dfbf2ec01a37d474959211c3c68c9ac3f6b",
+          "frames": 30,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=30/1|avg_frame_rate=30/1|time_base=1/15360|start_pts=0|duration_ts=15360|bit_rate=886816|nb_frames=30|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=896424|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-landscape-pan#0}"
+      ]
+    },
+    {
+      "name": "motion-narrow-cancel",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "30",
+            "-i",
+            "{work}/inputs/narrow.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.25-(1.25-1)*on/29':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=30:s=90x160:fps=30",
+            "-frames:v",
+            "30",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-narrow-cancel#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-narrow-cancel#0}",
+          "bytes": 177532,
+          "sha256": "233ef541db67b5bfcaa6cf275b7e6945799c6167745c2ec5a98bec7b1a1e150e",
+          "video_framemd5": "43d9779e7b7319fc009a12f1dda77cda69d206d7ce307b7c87f1b3f96c8ac18e",
+          "frames": 30,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=30/1|avg_frame_rate=30/1|time_base=1/15360|start_pts=0|duration_ts=15360|bit_rate=1410392|nb_frames=30|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=1420256|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-narrow-cancel#0}"
+      ]
+    },
+    {
+      "name": "motion-short",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/portrait.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.1':x='(iw-iw/zoom)*(1-on/1)':y='(ih-ih/zoom)/2':d=1:s=90x160:fps=10",
+            "-frames:v",
+            "1",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{motion-short#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{motion-short#0}",
+          "bytes": 13204,
+          "sha256": "e7bf095c504067684f02aee0f733c784d9b50fb31f0f687dfb628d6b2da58693",
+          "video_framemd5": "db486e1a7a8cb8841645759f9255a7ee8b1e6d3aa496b2e283c14fda5bb304c8",
+          "frames": 1,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=31|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=1024|bit_rate=989360|nb_frames=1|extradata_size=45|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=0.100000|bit_rate=1056320|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{motion-short#0}"
+      ]
+    },
+    {
+      "name": "motion-invalid",
+      "calls": [],
+      "result": {
+        "err": "video dimensions must be positive and even"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "motion-missing",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/motion-missing/missing.jpg",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1+(1.25-1)*on/9':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=10:s=90x160:fps=10",
+            "-frames:v",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-b:v",
+            "8M",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{work}/motion-missing/{uuid1}.mp4"
+          ]
+        }
+      ],
+      "result": {
+        "err": "FFmpeg failed: exited with code 254: libavdevice    61.  1.100 / 61.  1.100 / libavfilter    10.  1.100 / 10.  1.100 / libswscale      8.  1.100 /  8.  1.100 / libswresample   5.  1.100 /  5.  1.100 / libpostproc    58.  1.100 / 58.  1.100 / [in#0 @ {address}] Error opening input: No such file or directory / Error opening input file {work}/motion-missing/missing.jpg. / Error opening input files: No such file or directory"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "motion-cancelled",
+      "calls": [],
+      "result": {
+        "err": "FFmpeg failed: Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "faded",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/portrait.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1+(1.25-1)*on/9':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=10:s=90x160:fps=10,fade=t=in:st=0:d=0.3,fade=t=out:st=0.6:d=0.4",
+            "-frames:v",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            "23",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{faded#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{faded#0}",
+          "bytes": 14049,
+          "sha256": "e4d36c687c592ccb4f231fb089892422eefd362210e984020abc5b6bd0bf86ba",
+          "video_framemd5": "9fb70a92438ce26e7452edb855fc54aedf9edc5abd6c7e097409621cbb069da7",
+          "frames": 10,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=10240|bit_rate=104696|nb_frames=10|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=112392|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{faded#0}"
+      ]
+    },
+    {
+      "name": "faded-none",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "10",
+            "-i",
+            "{work}/inputs/landscape.ppm",
+            "-vf",
+            "scale=90:160:force_original_aspect_ratio=increase,crop=90:160,setsar=1,scale=360:640:flags=bicubic,format=yuv444p,zoompan=z='1.1':x='(iw-iw/zoom)*(1-on/14)':y='(ih-ih/zoom)/2':d=15:s=90x160:fps=10",
+            "-frames:v",
+            "15",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            "23",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{faded-none#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{faded-none#0}",
+          "bytes": 8232,
+          "sha256": "9c759456a2911370b6038a4a8e640fafe80372ed9b9c2a96775d6abee2fd64a7",
+          "video_framemd5": "703d87673f7a1c305c62ae5a30f84ad43996f395ee419c2c09abdf649815b053",
+          "frames": 15,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=15360|bit_rate=38282|nb_frames=15|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.500000|bit_rate=43904|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{faded-none#0}"
+      ]
+    },
+    {
+      "name": "faded-full-hd",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-loop",
+            "1",
+            "-framerate",
+            "30",
+            "-i",
+            "{work}/inputs/landscape.ppm",
+            "-vf",
+            "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,scale=4320:7680:flags=bicubic,format=yuv444p,zoompan=z='1.25-(1.25-1)*on/14':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=15:s=1080x1920:fps=30,fade=t=in:st=0:d=0.1,fade=t=out:st=0.3:d=0.2",
+            "-frames:v",
+            "15",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            "23",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            "{faded-full-hd#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{faded-full-hd#0}",
+          "bytes": 97613,
+          "sha256": "cbc9a349fde5e78eace1921d842912baa817c0f115b5909fa9a831ab7ba804a9",
+          "video_framemd5": "7a836c2434b0d33751875ce79261312a578832070541adde973998f6d8437e83",
+          "frames": 15,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=1080|height=1920|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=40|r_frame_rate=30/1|avg_frame_rate=30/1|time_base=1/15360|start_pts=0|duration_ts=7680|bit_rate=1545552|nb_frames=15|extradata_size=48|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=0.500000|bit_rate=1561808|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{faded-full-hd#0}"
+      ]
+    },
+    {
+      "name": "video-duration",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{motion-zoom-in#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "1.0"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "video-duration-missing",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{work}/video-duration-missing/nothing.mp4"
+          ]
+        }
+      ],
+      "result": {
+        "err": "ffprobe could not read {work}/video-duration-missing/nothing.mp4 (exit code 1)"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "combine-video",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-i",
+            "{motion-zoom-in#0}",
+            "-i",
+            "{motion-zoom-out#0}",
+            "-y",
+            "-filter_complex",
+            "[0:v]scale=w=90:h=160:force_original_aspect_ratio=decrease,pad=90:160:(ow-iw)/2:(oh-ih)/2,setsar=1 [v0];[1:v]scale=w=90:h=160:force_original_aspect_ratio=decrease,pad=90:160:(ow-iw)/2:(oh-ih)/2,setsar=1 [v1];[v0][v1]concat=n=2:v=1:a=0 [v]",
+            "-map",
+            "[v]",
+            "-r",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-an",
+            "{combine-video#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-video#0}",
+          "bytes": 25735,
+          "sha256": "bd816b1a7f3243a8e15512ff297a6844d9f0fe0b104003a2f8925c92d228ce49",
+          "video_framemd5": "6562c6d0fdb854c0e33eb1889d2c471ec7d264dfe447faee1c72c755fd073463",
+          "frames": 20,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=20480|bit_rate=98612|nb_frames=20|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=2.000000|bit_rate=102940|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-video#0}"
+      ]
+    },
+    {
+      "name": "combine-video-fade",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{motion-left-to-right#0}"
+          ]
+        },
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{motion-right-to-left#0}"
+          ]
+        },
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-i",
+            "{motion-left-to-right#0}",
+            "-i",
+            "{motion-right-to-left#0}",
+            "-i",
+            "{motion-landscape-pan#0}",
+            "-y",
+            "-filter_complex",
+            "[0:v]scale=w=90:h=160:force_original_aspect_ratio=decrease,pad=90:160:(ow-iw)/2:(oh-ih)/2,setsar=1,fade=t=out:st=0.7:d=0.3 [v0];[1:v]scale=w=90:h=160:force_original_aspect_ratio=decrease,pad=90:160:(ow-iw)/2:(oh-ih)/2,setsar=1,fade=t=in:st=0:d=0.3,fade=t=out:st=0.7:d=0.3 [v1];[2:v]scale=w=90:h=160:force_original_aspect_ratio=decrease,pad=90:160:(ow-iw)/2:(oh-ih)/2,setsar=1,fade=t=in:st=0:d=0.3 [v2];[v0][v1][v2]concat=n=3:v=1:a=0 [v]",
+            "-map",
+            "[v]",
+            "-r",
+            "10",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-an",
+            "{combine-video-fade#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{combine-video-fade#0}",
+          "bytes": 22905,
+          "sha256": "c8a13a9ed1e2001cb4f112553939381d5ffe83d0683caaf1f6dfecb25a08db83",
+          "video_framemd5": "633cb017f4480c552954e193c8ee8d6f37b9b573c90540daff5c12b7b427d479",
+          "frames": 32,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=32768|bit_rate=54267|nb_frames=32|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=3.200000|bit_rate=57262|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{combine-video-fade#0}"
+      ]
+    },
+    {
+      "name": "combine-video-empty",
+      "calls": [],
+      "result": {
+        "err": "No input files provided"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "combine-video-broken",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            "{work}/combine-video-broken/broken.mp4"
+          ]
+        }
+      ],
+      "result": {
+        "err": "ffprobe could not read {work}/combine-video-broken/broken.mp4 (exit code 1)"
+      },
+      "outputs": [],
+      "files": [
+        "{work}/combine-video-broken/broken.mp4"
+      ]
+    },
+    {
+      "name": "combine-video-cancelled",
+      "calls": [],
+      "result": {
+        "err": "FFmpeg failed: Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "concat-matching",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=codec_name,profile,codec_tag_string,width,height,pix_fmt,level,sample_aspect_ratio,r_frame_rate,avg_frame_rate,time_base,start_time,field_order,color_range,color_space,color_transfer,color_primaries,chroma_location,extradata_hash",
+            "-show_data_hash",
+            "sha256",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{work}/concat-matching/first clip's.mp4"
+          ]
+        },
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=codec_name,profile,codec_tag_string,width,height,pix_fmt,level,sample_aspect_ratio,r_frame_rate,avg_frame_rate,time_base,start_time,field_order,color_range,color_space,color_transfer,color_primaries,chroma_location,extradata_hash",
+            "-show_data_hash",
+            "sha256",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{work}/concat-matching/second clip's.mp4"
+          ]
+        },
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "{work}/concat-matching/{uuid1}.ffconcat",
+            "-map",
+            "0:v:0",
+            "-c:v",
+            "copy",
+            "-an",
+            "{concat-matching#0}"
+          ],
+          "lists": {
+            "{work}/concat-matching/{uuid1}.ffconcat": "file '{work}/concat-matching/first clip'\\''s.mp4'\nfile '{work}/concat-matching/second clip'\\''s.mp4'"
+          }
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{concat-matching#0}",
+          "bytes": 21489,
+          "sha256": "d9ea2d2997f3f995deddfd969cb1fe937645ba0b617998c4418469642d1ec329",
+          "video_framemd5": "3fde17e080fa943c65869178e3dd7b57ad2972dbb3db4e44e477f5253dbe6f30",
+          "frames": 25,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=25600|bit_rate=65097|nb_frames=25|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=2.500000|bit_rate=68764|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{concat-matching#0}",
+        "{work}/concat-matching/first clip's.mp4",
+        "{work}/concat-matching/second clip's.mp4"
+      ]
+    },
+    {
+      "name": "concat-matching-size",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=codec_name,profile,codec_tag_string,width,height,pix_fmt,level,sample_aspect_ratio,r_frame_rate,avg_frame_rate,time_base,start_time,field_order,color_range,color_space,color_transfer,color_primaries,chroma_location,extradata_hash",
+            "-show_data_hash",
+            "sha256",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{faded#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "None"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "concat-matching-different",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=codec_name,profile,codec_tag_string,width,height,pix_fmt,level,sample_aspect_ratio,r_frame_rate,avg_frame_rate,time_base,start_time,field_order,color_range,color_space,color_transfer,color_primaries,chroma_location,extradata_hash",
+            "-show_data_hash",
+            "sha256",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{faded#0}"
+          ]
+        },
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=codec_name,profile,codec_tag_string,width,height,pix_fmt,level,sample_aspect_ratio,r_frame_rate,avg_frame_rate,time_base,start_time,field_order,color_range,color_space,color_transfer,color_primaries,chroma_location,extradata_hash",
+            "-show_data_hash",
+            "sha256",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{motion-zoom-in#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": "None"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "concat-matching-missing",
+      "calls": [
+        {
+          "tool": "ffprobe",
+          "args": [
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=codec_name,profile,codec_tag_string,width,height,pix_fmt,level,sample_aspect_ratio,r_frame_rate,avg_frame_rate,time_base,start_time,field_order,color_range,color_space,color_transfer,color_primaries,chroma_location,extradata_hash",
+            "-show_data_hash",
+            "sha256",
+            "-of",
+            "default=noprint_wrappers=1",
+            "{work}/concat-matching-missing/missing.mp4"
+          ]
+        }
+      ],
+      "result": {
+        "err": "ffprobe failed to inspect clip compatibility"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "concat-matching-cancelled",
+      "calls": [],
+      "result": {
+        "err": "Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "mux-copy",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{faded#0}",
+            "-i",
+            "{work}/inputs/tone-330-2s.wav",
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
+            "-c:a",
+            "aac",
+            "-shortest",
+            "-c:v",
+            "copy",
+            "{mux-copy#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{mux-copy#0}",
+          "bytes": 23733,
+          "sha256": "472a2edfada1ff96583767f879adf4b20e5da1dc94882ea43bd0dc60bd6b88f8",
+          "audio_md5": "MD5=74b6a758b5477d4a6540c5e51e1581ac",
+          "video_framemd5": "9fb70a92438ce26e7452edb855fc54aedf9edc5abd6c7e097409621cbb069da7",
+          "frames": 10,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=10240|bit_rate=104696|nb_frames=10|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "stream|index=1|codec_name=aac|profile=LC|codec_type=audio|codec_tag_string=mp4a|sample_fmt=fltp|sample_rate=48000|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/48000|start_pts=0|duration_ts=47088|bit_rate=70204|nb_frames=47|extradata_size=5|tag:language=und|tag:handler_name=SoundHandler|tag:vendor_id=[0][0][0][0]",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=1.000000|bit_rate=189864|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{mux-copy#0}"
+      ]
+    },
+    {
+      "name": "mux-copy-duration",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{concat-matching#0}",
+            "-i",
+            "{work}/inputs/tone-330-2s.wav",
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
+            "-c:a",
+            "aac",
+            "-t",
+            "2",
+            "-c:v",
+            "copy",
+            "{mux-copy-duration#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{mux-copy-duration#0}",
+          "bytes": 39739,
+          "sha256": "545e79720ee4c22942bd27362bd9ddad86712dfa0d262cb7700e507b9093a376",
+          "audio_md5": "MD5=f128e2a781a18e4000d83b1c54a35348",
+          "video_framemd5": "3d9627998768a133a1b5ffcc34b3f22b989edce8924fe0e6e0eb8157d7b8362f",
+          "frames": 22,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=22528|bit_rate=71745|nb_frames=22|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "stream|index=1|codec_name=aac|profile=LC|codec_type=audio|codec_tag_string=mp4a|sample_fmt=fltp|sample_rate=48000|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/48000|start_pts=0|duration_ts=96000|bit_rate=69791|nb_frames=95|extradata_size=5|tag:language=und|tag:handler_name=SoundHandler|tag:vendor_id=[0][0][0][0]",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=2.200000|bit_rate=144505|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{mux-copy-duration#0}"
+      ]
+    },
+    {
+      "name": "mux-copy-invalid",
+      "calls": [],
+      "result": {
+        "err": "mux duration must be finite and positive"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "mux-cancelled",
+      "calls": [],
+      "result": {
+        "err": "FFmpeg failed: Process cancelled"
+      },
+      "outputs": [],
+      "files": []
+    },
+    {
+      "name": "add-audio",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{motion-zoom-in#0}",
+            "-i",
+            "{work}/inputs/tone-330-half.wav",
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
+            "-c:a",
+            "aac",
+            "-shortest",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-r",
+            "10",
+            "{add-audio#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{add-audio#0}",
+          "bytes": 15694,
+          "sha256": "2672dd99071cabd4c1a0b9019d44be8c5bcf88ae55dc5bd2bd966bb29e89d7bb",
+          "audio_md5": "MD5=5bc75007328fed358d6dcbfc03c806d8",
+          "video_framemd5": "0173a4a3d23067523637e919190fd0510358b70a9a659579de224d2913d6d883",
+          "frames": 5,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=5120|bit_rate=149248|nb_frames=5|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "stream|index=1|codec_name=aac|profile=LC|codec_type=audio|codec_tag_string=mp4a|sample_fmt=fltp|sample_rate=48000|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/48000|start_pts=0|duration_ts=24000|bit_rate=72659|nb_frames=25|extradata_size=5|tag:language=und|tag:handler_name=SoundHandler|tag:vendor_id=[0][0][0][0]",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=0.500000|bit_rate=251104|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{add-audio#0}"
+      ]
+    },
+    {
+      "name": "add-audio-cancel",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{combine-video#0}",
+            "-i",
+            "{work}/inputs/tone-330-2s.wav",
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
+            "-c:a",
+            "aac",
+            "-shortest",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "{add-audio-cancel#0}"
+          ]
+        }
+      ],
+      "result": {
+        "ok": ""
+      },
+      "outputs": [
+        {
+          "name": "{add-audio-cancel#0}",
+          "bytes": 44702,
+          "sha256": "8b35e7d597ce5c8588801798400b3650243677599e479d819a3550bded84291e",
+          "audio_md5": "MD5=f128e2a781a18e4000d83b1c54a35348",
+          "video_framemd5": "27261a063c4cfb201e4b328425c2f19908cc1592f20aa7778b4761989d53c23b",
+          "frames": 20,
+          "streams": [
+            "stream|index=0|codec_name=h264|profile=High|codec_type=video|codec_tag_string=avc1|width=90|height=160|sample_aspect_ratio=1:1|pix_fmt=yuv420p|level=10|r_frame_rate=10/1|avg_frame_rate=10/1|time_base=1/10240|start_pts=0|duration_ts=20480|bit_rate=98948|nb_frames=20|extradata_size=46|tag:language=und|tag:handler_name=VideoHandler|tag:vendor_id=[0][0][0][0]|tag:encoder=Lavc61.3.100 libx264",
+            "stream|index=1|codec_name=aac|profile=LC|codec_type=audio|codec_tag_string=mp4a|sample_fmt=fltp|sample_rate=48000|channels=1|channel_layout=mono|r_frame_rate=0/0|avg_frame_rate=0/0|time_base=1/48000|start_pts=0|duration_ts=96000|bit_rate=69791|nb_frames=95|extradata_size=5|tag:language=und|tag:handler_name=SoundHandler|tag:vendor_id=[0][0][0][0]",
+            "format|format_name=mov,mp4,m4a,3gp,3g2,mj2|duration=2.000000|bit_rate=178808|tag:major_brand=isom|tag:minor_version=512|tag:compatible_brands=isomiso2avc1mp41|tag:encoder=Lavf61.1.100"
+          ]
+        }
+      ],
+      "files": [
+        "{add-audio-cancel#0}"
+      ]
+    },
+    {
+      "name": "add-audio-missing",
+      "calls": [
+        {
+          "tool": "ffmpeg",
+          "args": [
+            "-y",
+            "-i",
+            "{motion-zoom-in#0}",
+            "-i",
+            "{work}/add-audio-missing/missing.wav",
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
+            "-c:a",
+            "aac",
+            "-shortest",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "{work}/add-audio-missing/{uuid1}.mp4"
+          ]
+        }
+      ],
+      "result": {
+        "err": "FFmpeg failed: exited with code 254: Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 90x160 [SAR 1:1 DAR 9:16], 798 kb/s, 10 fps, 10 tbr, 10240 tbn (default) / Metadata: / handler_name    : VideoHandler / vendor_id       : [0][0][0][0] / encoder         : Lavc61.3.100 libx264 / [in#1 @ {address}] Error opening input: No such file or directory / Error opening input file {work}/add-audio-missing/missing.wav. / Error opening input files: No such file or directory"
+      },
+      "outputs": [],
+      "files": []
+    }
+  ]
+}
