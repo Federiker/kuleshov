@@ -10,12 +10,9 @@ the same output ([docs/parity.md](docs/parity.md)).
   - [ ] Checks green on Linux (a push) and Windows (a manual run), once it is
     on GitHub. Locally `mise run ci` passes on Windows, and the tests and the
     parity test pass on Linux (WSL, the 7.0.2 build, cross-compiled binaries).
-- [ ] Coverage: the threshold is 80% of lines and regions, as in jespersen;
-  measured 93.8% of lines and 93.0% of regions on Windows (27 October 2026).
-  Raise it to 90% if the owner agrees.
-- [ ] The full-HD motion test (`supersampled_motion_reduces_zoom_jitter_…`)
-  takes 40 s on Windows and 64 s in WSL, most of the test time: keep it, or
-  measure fewer frames? Ask the owner.
+- [ ] FFmpeg downloaded on request (owner, 27 October 2026): the `download`
+  feature, `Tools::find_or_download`, the pins in one manifest shared with
+  `scripts/downloads.ts`.
 
 ## manuzio and melies
 
@@ -27,22 +24,6 @@ the same output ([docs/parity.md](docs/parity.md)).
 - [ ] melies uses kuleshov for its encodes and trailers (melies' own roadmap);
   its music mix runs FFmpeg itself through `Tools::command` and
   `run_cancellable`.
-
-## Behaviour kept from manuzio, to decide
-
-Each changes an argument or an output, so the parity references would be
-recorded again (from manuzio, after the same change there) or the scenario
-excluded: the owner decides.
-
-- [ ] Room tone is random: `anoisesrc` gets no seed, so two retail encodes of
-  the same speech differ. A fixed seed (`seed=…`) would make them
-  reproducible and let the parity test compare their bytes.
-- [ ] An audio concat list writes each path through `to_string_lossy`, so a
-  name that is not valid Unicode is altered in the list; the video join
-  refuses such a path with `Error::UnsupportedPath`. Refuse it in the audio
-  lists too?
-- [ ] `analyze_audio` cannot be cancelled while it decodes (a long chapter
-  takes seconds); a `_with_cancel` variant would stop it.
 
 ## Later, if wanted
 

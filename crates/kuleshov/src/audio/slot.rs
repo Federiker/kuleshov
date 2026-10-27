@@ -91,7 +91,8 @@ pub fn concat_wav(tools: &Tools, files: &[PathBuf], rate: u32, out_dir: &Path) -
 /// partial output when the join fails or is cancelled.
 ///
 /// # Errors
-/// [`Error::InvalidInput`] without files, [`Error::Io`] when the folder or the list cannot be
+/// [`Error::InvalidInput`] without files, [`Error::UnsupportedPath`] for a path the list cannot hold,
+/// [`Error::Io`] when the folder or the list cannot be
 /// written, [`Error::Cancelled`], and the errors of [`run_cancellable`].
 pub fn concat_wav_with_cancel(
     tools: &Tools,
@@ -103,9 +104,10 @@ pub fn concat_wav_with_cancel(
     if files.is_empty() {
         return Err(Error::InvalidInput("no input files provided".to_owned()));
     }
+    let contents = concat_list(files)?;
     fs::create_dir_all(out_dir).map_err(Error::io(out_dir))?;
     let list = out_dir.join(format!("{}.txt", Uuid::new_v4()));
-    if let Err(error) = fs::write(&list, concat_list(files)) {
+    if let Err(error) = fs::write(&list, contents) {
         let _ = fs::remove_file(&list);
         return Err(Error::io(&list)(error));
     }

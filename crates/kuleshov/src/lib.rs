@@ -6,6 +6,7 @@
 //! downloads or searches for them. Every function that runs them takes `&Tools` first.
 
 mod audio;
+mod concat;
 mod error;
 mod process;
 mod tools;

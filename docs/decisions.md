@@ -66,3 +66,23 @@ undoing one.
       error;
     - the `Cancelled` error reads "cancelled" (manuzio's "Process cancelled"
       came wrapped in the operation's context).
+
+## After the port (27 October 2026)
+
+16. **Coverage** stays at 90% or more of lines and regions (measured 93.8%
+    and 93.0% when it was set).
+17. **The full-HD motion test** stays as it is, though it takes most of the
+    test time (40 s on Windows, 64 s in WSL).
+18. **Room tone stays random**, as in manuzio: `anoisesrc` gets no seed, and
+    the parity test compares room-tone outputs by their levels
+    ([parity.md](parity.md#how-they-are-compared)).
+19. **`analyze_audio_with_cancel`**: a long chapter is decoded for seconds,
+    and the caller can now stop it. It is not in the references (manuzio has
+    no such function); `analyze_audio` calls it, so the parity test covers
+    its arguments.
+20. **Concat lists refuse what they cannot hold.** An audio list wrote a name
+    that is not valid Unicode through `to_string_lossy`, so FFmpeg was sent
+    to a file that does not exist; now every list (audio and video) refuses
+    such a path, and a path with a line break, with `Error::UnsupportedPath`
+    naming it, before anything is written. Valid Unicode paths are written as
+    before, so the references stand.

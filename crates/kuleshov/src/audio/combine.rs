@@ -1,4 +1,4 @@
-use crate::{Error, Result, Tool, Tools, process::run_cancellable};
+use crate::{Error, Result, Tool, Tools, concat::concat_entry, process::run_cancellable};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -64,16 +64,14 @@ pub struct RoomTone {
     pub level_dbfs: f32,
 }
 
-/// The list file FFmpeg's concat demuxer reads: one `file '<path>'` line per input.
-///
-/// A single quote inside a path ends the quoted name early, so it is written as `'\''` (close the
-/// quote, an escaped quote, reopen). Backslashes of Windows paths are literal inside the quotes.
-pub(crate) fn concat_list(files: &[PathBuf]) -> String {
-    files
+/// The list file FFmpeg's concat demuxer reads: one `file '<path>'` line per input, each path as
+/// given ([`concat_entry`]).
+pub(crate) fn concat_list(files: &[PathBuf]) -> Result<String> {
+    Ok(files
         .iter()
-        .map(|path| format!("file '{}'", path.to_string_lossy().replace('\'', "'\\''")))
-        .collect::<Vec<_>>()
-        .join("\n")
+        .map(|path| concat_entry(path, path))
+        .collect::<Result<Vec<_>>>()?
+        .join("\n"))
 }
 
 /// Encoding choices for [`combine_audio_files_with_options`].
@@ -111,7 +109,8 @@ const NOISE_PEAK_OFFSET_DB: f32 = 16.2;
 /// beside it that is always removed; a cancelled or failed encode removes its partial output.
 ///
 /// # Errors
-/// [`Error::InvalidInput`] without files, [`Error::Io`] when the folder or the list cannot be
+/// [`Error::InvalidInput`] without files, [`Error::UnsupportedPath`] for a path the list cannot hold
+/// (not valid Unicode, or with a line break), [`Error::Io`] when the folder or the list cannot be
 /// written, [`Error::Cancelled`], and the errors of [`run_cancellable`].
 pub fn combine_audio_files_with_options(
     tools: &Tools,
@@ -124,6 +123,7 @@ pub fn combine_audio_files_with_options(
     if files.is_empty() {
         return Err(Error::InvalidInput("no input files provided".to_owned()));
     }
+    let list = concat_list(files)?;
 
     let out_dir = data_dir.join("audio");
     fs::create_dir_all(&out_dir).map_err(Error::io(&out_dir))?;
@@ -132,7 +132,7 @@ pub fn combine_audio_files_with_options(
 
     // Create concat list file
     let list_path = out_dir.join(format!("{}.txt", Uuid::new_v4()));
-    if let Err(error) = fs::write(&list_path, concat_list(files)) {
+    if let Err(error) = fs::write(&list_path, list) {
         let _ = fs::remove_file(&list_path);
         return Err(Error::io(&list_path)(error));
     }

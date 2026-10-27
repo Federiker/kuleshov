@@ -1,5 +1,6 @@
 use crate::{
     Error, Result, Tool, Tools,
+    concat::concat_entry,
     process::{self, cancelled, run_cancellable},
     video_duration,
 };
@@ -87,20 +88,7 @@ pub fn concat_matching_video_files_with_cancel(
     let output = output_path.join(format!("{}.mp4", Uuid::new_v4()));
     let contents = input_files
         .iter()
-        .map(|file| {
-            let absolute = std::path::absolute(file).map_err(Error::io(file))?;
-            let name = absolute.to_str().ok_or_else(|| Error::UnsupportedPath {
-                path: file.clone(),
-                reason: "a clip path that is not valid Unicode cannot go in a concat list",
-            })?;
-            if name.contains(['\n', '\r']) {
-                return Err(Error::UnsupportedPath {
-                    path: file.clone(),
-                    reason: "a clip path with a line break cannot go in a concat list",
-                });
-            }
-            Ok(format!("file '{}'", name.replace('\'', "'\\''")))
-        })
+        .map(|file| concat_entry(&std::path::absolute(file).map_err(Error::io(file))?, file))
         .collect::<Result<Vec<_>>>()?
         .join("\n");
     if let Err(error) = std::fs::write(&list, contents) {
