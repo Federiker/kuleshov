@@ -15,11 +15,13 @@ the same output ([docs/parity.md](docs/parity.md)).
   - [x] `Tools::find_or_download`, the pins in one manifest shared with
     `scripts/downloads.ts`, tested on Windows against archives served locally
     (the real programs repacked, so the installed pair must run).
-  - [ ] One real download of each pinned build, end to end (about 100 MB on
-    Windows, 40 MB on Linux): ask the owner first.
-  - [ ] On Linux: the WSL check builds its tests on Windows for musl, where
-    ring would need a C cross-compiler, so the `download` tests run on Linux
-    only in CI.
+  - [x] A real download of each pinned build with the `install_ffmpeg`
+    example (27 October 2026): Windows 114 MB, Linux x64 41 MB, checksums
+    verified, the programs byte for byte those of the reference builds, a
+    second run with no download, and the parity test passing on each
+    downloaded pair. Linux arm64 is pinned but untried.
+  - [x] Every test, the `download` ones included, built and run natively on
+    Linux (WSL with build-essential).
 
 ## manuzio and melies
 

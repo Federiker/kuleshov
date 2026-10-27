@@ -40,7 +40,8 @@ run. Nothing else in kuleshov touches the network. The pinned builds are in
 [ffmpeg-builds.json](crates/kuleshov/ffmpeg-builds.json): gyan.dev's 9.0.2
 essentials build on Windows x64, johnvansickle's 7.0.2 static builds on Linux
 x64 and arm64, the builds the parity references belong to; none on macOS.
-`Tools::find_or_download_build` takes a build of the program's choosing
+[`examples/install_ffmpeg.rs`](crates/kuleshov/examples/install_ffmpeg.rs) shows
+the call. `Tools::find_or_download_build` takes a build of the program's choosing
 instead. Both pinned builds are GPL-3.0: whether a program offers them to its
 users, and how, is that program's decision.
 

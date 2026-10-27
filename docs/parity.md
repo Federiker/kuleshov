@@ -98,10 +98,13 @@ scenarios must stay the same on both sides, one for one.
 - **Windows:** `cargo build -p kuleshov_parity --bin kuleshov-record`, build
   the harness, and run it with `target/debug/kuleshov-record.exe`,
   `../manuzio/assets/tools`, a work folder and the output file.
-- **Linux (WSL):** without a C toolchain in WSL, both programs are
+- **Linux (WSL):** build and run both natively in WSL (with a C toolchain,
+  such as Ubuntu's `build-essential`) with the pinned 7.0.2 build, which
+  `cargo run -p kuleshov --features download --example install_ffmpeg -- <folder>`
+  installs. Without a C toolchain, both programs can instead be
   cross-compiled on Windows for `x86_64-unknown-linux-musl`, linked by the
   bundled rust-lld (`CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=rust-lld`),
-  and run in WSL with the pinned 7.0.2 build.
+  as the references were first recorded.
 
 Record twice on each platform and compare: only the room-tone outputs may
 differ.
