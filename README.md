@@ -25,11 +25,24 @@ parity test checks it ([docs/parity.md](docs/parity.md)).
 
 ## FFmpeg is yours to supply
 
-kuleshov **never bundles, downloads or searches for FFmpeg**, at build time or
-at run time. The program that uses it says where `ffmpeg` and `ffprobe` are,
-and ships or installs them itself under FFmpeg's own licence (LGPL or GPL,
-depending on the build). Without instructions, kuleshov runs the bare names,
-which the system finds on `PATH`.
+kuleshov **never bundles FFmpeg, and never downloads it unless asked**. The
+program that uses it says where `ffmpeg` and `ffprobe` are, and ships or
+installs them itself under FFmpeg's own licence (LGPL or GPL, depending on the
+build). Without instructions, kuleshov runs the bare names, which the system
+finds on `PATH`.
+
+With the `download` feature, the program may instead ask kuleshov to install
+the pinned build for its platform into a folder of its choosing, once:
+`Tools::find_or_download(dir, progress, cancel)` uses `ffmpeg` and `ffprobe`
+from `dir` when they are there, and otherwise downloads the build, checks its
+SHA-256, takes only the two programs out of the archive and checks that they
+run. Nothing else in kuleshov touches the network. The pinned builds are in
+[ffmpeg-builds.json](crates/kuleshov/ffmpeg-builds.json): gyan.dev's 9.0.2
+essentials build on Windows x64, johnvansickle's 7.0.2 static builds on Linux
+x64 and arm64, the builds the parity references belong to; none on macOS.
+`Tools::find_or_download_build` takes a build of the program's choosing
+instead. Both pinned builds are GPL-3.0: whether a program offers them to its
+users, and how, is that program's decision.
 
 ```rust
 use kuleshov::{CombineOptions, Mp3Encoding, Tool, Tools, combine_audio_files_with_options};
@@ -39,6 +52,8 @@ let tools = Tools::find_in(["/opt/myapp/bin"]);
 let tools = Tools::new("/usr/bin/ffmpeg", "/usr/bin/ffprobe");
 let tools = Tools::with_resolver(|tool: Tool| my_settings().path_of(tool.name()));
 let tools = Tools::default(); // ffmpeg and ffprobe from PATH
+// With the `download` feature: installed into the folder once, if missing.
+let tools = Tools::find_or_download(&app_data.join("ffmpeg"), |done, total| show(done, total), None)?;
 
 let options = CombineOptions {
     encoding: Mp3Encoding::Cbr(192),
@@ -57,13 +72,17 @@ Every fallible function returns [`kuleshov::Error`](crates/kuleshov/src/error.rs
 `Cancelled`, `InvalidInput`, `UnsupportedPath`, `Run` (the program could not
 be started), `Failed` (it ran and failed: its exit code, the last lines of its
 standard error and the file it was working on), `Probe` (its answer about a
-file could not be used) and `Io`. `error.is_cancelled()` and `error.file()`
+file could not be used), `Io` and `Download` (the server, the checksum or the
+archive of an FFmpeg build failed). `error.is_cancelled()` and `error.file()`
 answer the common questions; the library never uses `anyhow`.
 
 ### Features
 
 - `tokio` (off by default): `audio_duration_async` and
   `combine_audio_files_async`, run on Tokio's blocking pool.
+- `download` (off by default): `Tools::find_or_download`,
+  `Tools::find_or_download_build` and `FfmpegBuild`, with blocking HTTPS
+  (ureq and rustls), ZIP and tar.xz.
 
 ### Using it
 
@@ -91,7 +110,9 @@ On a new machine, `scripts/install.sh` (macOS, Linux, Git Bash) or
 Run it again at any time.
 
 The tests run FFmpeg. `mise run tools` downloads the pinned build for this
-platform once (its SHA-256 is checked, [scripts/downloads.ts](scripts/downloads.ts))
+platform once (its SHA-256 is checked; the pins are those of
+[ffmpeg-builds.json](crates/kuleshov/ffmpeg-builds.json), which
+[scripts/downloads.ts](scripts/downloads.ts) reads)
 and stages `ffmpeg` and `ffprobe` in the gitignored `tools/`; the tests find
 them through `KULESHOV_TOOLS_DIR`, which [mise.toml](mise.toml) points there.
 To use FFmpeg from elsewhere, such as a sibling manuzio checkout's staged

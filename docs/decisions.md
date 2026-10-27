@@ -13,9 +13,10 @@ is not argued again without a reason.
    variables, the tools passed in, typed errors.
 3. **Licence.** CC0 1.0, like jespersen; open source. Not on crates.io:
    manuzio and melies pin the repository by commit.
-4. **FFmpeg is the caller's.** Never bundled, downloaded at run time or looked
-   for: the caller says where `ffmpeg` and `ffprobe` are, and `PATH` is the
-   fallback. The library reads no environment variable.
+4. **FFmpeg is the caller's.** Never bundled or looked for: the caller says
+   where `ffmpeg` and `ffprobe` are, and `PATH` is the fallback. The library
+   reads no environment variable. (Downloading on request came later:
+   decision 21.)
 5. **The API.** manuzio's functions keep their names and variants (plain,
    `_with_cancel`, `_with_options`, `_async`) and take `&Tools` first, so
    manuzio's call sites change by one argument. `Tools` holds explicit paths,
@@ -86,3 +87,20 @@ undoing one.
     such a path, and a path with a line break, with `Error::UnsupportedPath`
     naming it, before anything is written. Valid Unicode paths are written as
     before, so the references stand.
+21. **FFmpeg downloaded on request**, so that manuzio may stop staging it
+    itself: the `download` feature (off by default) adds
+    `Tools::find_or_download(dir, progress, cancel)`, an explicit call that
+    keeps the pair in `dir`, or installs the pinned build there. No other
+    function touches the network.
+22. **The pins** are the reference builds, in one manifest,
+    [ffmpeg-builds.json](../crates/kuleshov/ffmpeg-builds.json), which
+    `scripts/downloads.ts` reads too; `find_or_download_build` takes a build of
+    the caller's choosing. A folder keeps the record `mise run tools` writes
+    (`download.json`): a pair put there by hand is kept, one from another pin
+    is replaced, and the new pair takes the old one's place only once it is
+    complete.
+23. **Blocking HTTPS with ureq and rustls** (ring, Mozilla's roots through
+    webpki-roots), matching kuleshov's synchronous, flag-cancellable API; ZIP
+    through zip with zlib-rs, tar.xz through lzma-rust2 and tar, all pure Rust
+    but ring. webpki-roots' CDLA-Permissive-2.0 is allowed, as in manuzio and
+    jerome, and cargo-deny now checks every feature.

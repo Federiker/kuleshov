@@ -70,7 +70,8 @@ same audio and video.
 ## The reference builds
 
 The references belong to one FFmpeg build per platform, pinned in
-[scripts/downloads.ts](../scripts/downloads.ts) and staged by
+[crates/kuleshov/ffmpeg-builds.json](../crates/kuleshov/ffmpeg-builds.json)
+(read by `scripts/downloads.ts` and the `download` feature) and staged by
 `mise run tools`:
 
 | Platform | Build | `ffmpeg` SHA-256 | `ffprobe` SHA-256 |

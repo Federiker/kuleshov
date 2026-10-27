@@ -48,3 +48,9 @@ The messages manuzio's tests look for are kept: "ffprobe could not read" with
 the file, "no input files provided" (audio), "No input files provided" (video),
 "slot length must be positive", "mux duration must be finite and positive" and
 "video dimensions must be positive and even".
+
+With the `download` feature, manuzio may also let kuleshov install FFmpeg
+instead of staging it: `kuleshov::Tools::find_or_download(dir, progress,
+cancel)` keeps the pair in `dir` (a pair staged by hand, or one from the same
+pin), or installs the pinned build there, the same one `assets/tools` holds
+today.

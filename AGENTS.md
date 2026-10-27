@@ -19,8 +19,9 @@ commit. It was split out of manuzio's `mnz-audios`, `mnz-videos` and part of
   test pass.
 - The references belong to one FFmpeg build per platform (Windows: gyan.dev
   9.0.2 essentials; Linux: johnvansickle 7.0.2 amd64 static, both pinned in
-  [scripts/downloads.ts](scripts/downloads.ts)). Changing a pin means new
-  references: ask the owner first.
+  [crates/kuleshov/ffmpeg-builds.json](crates/kuleshov/ffmpeg-builds.json),
+  which the `download` feature and `scripts/downloads.ts` both read). Changing
+  a pin means new references: ask the owner first.
 - A change that alters the arguments or the output is a decision for the
   owner, not a refactor: ask before making it.
 - Paths reach FFmpeg as the system gives them (names that are not valid
@@ -65,7 +66,9 @@ commit. It was split out of manuzio's `mnz-audios`, `mnz-videos` and part of
 - The library reads no environment variables and finds nothing on its own:
   the caller says where ffmpeg and ffprobe are (explicit paths or a resolver,
   `PATH` as the fallback). Only the tests read `KULESHOV_TOOLS_DIR`.
-- FFmpeg is never bundled, downloaded at run time or committed. Tests use the
+- FFmpeg is never bundled or committed, and downloaded only when the caller
+  asks: the `download` feature's `Tools::find_or_download`, an explicit call;
+  no other function may touch the network. Tests use the
   pinned build that `mise run tools` stages in the gitignored `tools/`, or the
   folder `KULESHOV_TOOLS_DIR` names (set it in the gitignored
   `mise.local.toml`). Never copy FFmpeg binaries into the repository; commit

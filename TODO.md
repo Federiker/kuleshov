@@ -10,9 +10,16 @@ the same output ([docs/parity.md](docs/parity.md)).
   - [ ] Checks green on Linux (a push) and Windows (a manual run), once it is
     on GitHub. Locally `mise run ci` passes on Windows, and the tests and the
     parity test pass on Linux (WSL, the 7.0.2 build, cross-compiled binaries).
-- [ ] FFmpeg downloaded on request (owner, 27 October 2026): the `download`
-  feature, `Tools::find_or_download`, the pins in one manifest shared with
-  `scripts/downloads.ts`.
+- [ ] FFmpeg downloaded on request (`download` feature,
+  [decisions 21–23](docs/decisions.md#after-the-port-27-october-2026)):
+  - [x] `Tools::find_or_download`, the pins in one manifest shared with
+    `scripts/downloads.ts`, tested on Windows against archives served locally
+    (the real programs repacked, so the installed pair must run).
+  - [ ] One real download of each pinned build, end to end (about 100 MB on
+    Windows, 40 MB on Linux): ask the owner first.
+  - [ ] On Linux: the WSL check builds its tests on Windows for musl, where
+    ring would need a C cross-compiler, so the `download` tests run on Linux
+    only in CI.
 
 ## manuzio and melies
 
@@ -21,6 +28,8 @@ the same output ([docs/parity.md](docs/parity.md)).
   - [ ] Port what changed in manuzio's crates since the copied commit.
   - [ ] The parity test passes against manuzio's staged FFmpeg at the pinned
     commit.
+  - [ ] Whether manuzio installs FFmpeg with `Tools::find_or_download` instead
+    of staging it (manuzio's decision).
 - [ ] melies uses kuleshov for its encodes and trailers (melies' own roadmap);
   its music mix runs FFmpeg itself through `Tools::command` and
   `run_cancellable`.
