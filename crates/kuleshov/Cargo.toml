@@ -20,3 +20,6 @@ tokio = ["dep:tokio"]
 [dependencies]
 tokio = { workspace = true, optional = true }
 uuid = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
