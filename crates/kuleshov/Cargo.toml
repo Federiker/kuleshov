@@ -44,3 +44,7 @@ lzma-rust2 = { workspace = true, features = ["encoder"] }
 tar = { workspace = true }
 tokio = { workspace = true }
 zip = { workspace = true }
+
+[[example]]
+name = "install_ffmpeg"
+required-features = ["download"]
