@@ -72,7 +72,7 @@ commit. It was split out of manuzio's `mnz-audios`, `mnz-videos` and part of
   only small fixtures, never large media.
 - Every test runs by default (`mise run test`); a test that needs FFmpeg fails
   clearly, naming the folder, when it is missing.
-- Keep test coverage at 80% or more of lines and regions
+- Keep test coverage at 90% or more of lines and regions
   (`mise run coverage`). CI fails below; new code comes with its tests.
 - Ask before decisions that materially change the public API, the FFmpeg
   arguments or output, or the licensing model (CC0 1.0).

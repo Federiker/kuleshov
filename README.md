@@ -112,7 +112,7 @@ run with any recent FFmpeg.
 | `mise run tools` | Stage the pinned FFmpeg in `tools/` |
 | `mise run check` | `cargo check` of the workspace, and with the `tokio` feature |
 | `mise run test` | The tests (nextest), the parity test among them |
-| `mise run coverage` | The tests, failing under 80% lines or regions |
+| `mise run coverage` | The tests, failing under 90% lines or regions |
 | `mise run clippy` | Clippy, warnings denied |
 | `mise run fix` | Format the Rust code and the scripts |
 | `mise run audit` | Dependency advisories, licences and sources |

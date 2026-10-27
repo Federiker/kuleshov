@@ -95,8 +95,8 @@ run = [
 ]
 
 [tasks.coverage]
-description = "The tests, at 80% coverage or more (CI adds --profile ci)"
-run = "cargo llvm-cov nextest --workspace --all-features --fail-under-lines 80 --fail-under-regions 80"
+description = "The tests, at 90% coverage or more (CI adds --profile ci)"
+run = "cargo llvm-cov nextest --workspace --all-features --fail-under-lines 90 --fail-under-regions 90"
 
 [tasks."scripts:test"]
 description = "The scripts' tests (bun test)"
