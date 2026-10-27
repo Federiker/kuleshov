@@ -1,0 +1,29 @@
+# Git hooks, installed by scripts/install.sh / install.bat (`lefthook install`). Skip once with
+# `git commit --no-verify` only when you mean to; CI runs the same checks.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: rustfmt
+      glob: "*.rs"
+      run: rustfmt {staged_files}
+      stage_fixed: true
+    # Format the staged scripts and JSON and apply Biome's safe lint fixes (biome.json), then stage
+    # the result; a lint error with no safe fix stops the commit. Markdown is left as written.
+    - name: biome
+      glob: "*.{js,mjs,ts,json,jsonc}"
+      run: bun x biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  jobs:
+    # The first line starts with a known [prefix] (README, "Git conventions").
+    - name: prefix
+      run: sh scripts/commit-message.sh {1}
+
+pre-push:
+  jobs:
+    - name: clippy
+      run: mise run clippy
+    - name: typecheck
+      run: mise run typecheck

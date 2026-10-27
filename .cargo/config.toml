@@ -1,0 +1,16 @@
+# Faster local builds.
+
+# Windows: rust-lld ships with the Rust toolchain and links much faster than
+# Microsoft's link.exe.
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"
+
+# Linux x86-64 needs nothing here: since Rust 1.90 it links with the bundled
+# rust-lld by default. macOS needs nothing either: Xcode 15 and later link with
+# Apple's fast linker (ld-prime) by default.
+#
+# Linux arm64 still uses the system linker. With LLD installed (for example the
+# `lld` package), uncommenting this makes it link with LLD; it is not on by
+# default because it would fail on machines without LLD.
+# [target.aarch64-unknown-linux-gnu]
+# rustflags = ["-C", "link-arg=-fuse-ld=lld"]

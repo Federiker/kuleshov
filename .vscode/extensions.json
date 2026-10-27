@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb",
+    "ms-vscode.cpptools",
+    "tombi-toml.tombi",
+    "biomejs.biome"
+  ],
+  "unwantedRecommendations": ["tamasfe.even-better-toml"]
+}

@@ -1,0 +1,6 @@
+# The Rust toolchain everyone and CI build with, the same as jespersen's, jerome's and manuzio's.
+# Upgrades are a one-line change here, with `rust-version` in Cargo.toml.
+[toolchain]
+channel = "1.94.1"
+components = ["rustfmt", "clippy", "llvm-tools"]
+profile = "minimal"

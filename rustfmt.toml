@@ -1,0 +1,4 @@
+# The edition is repeated here so that `rustfmt` on single files (the pre-commit hook) formats like
+# `cargo fmt`. The width stays rustfmt's default (100), as in manuzio, so that code copied from it
+# and later changes ported from it compare line by line.
+edition = "2024"

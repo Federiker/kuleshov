@@ -1,0 +1,7 @@
+# Tests may unwrap and expect; the rest of the code reports errors or states its reason
+# (see `unwrap_used` and `expect_used` in Cargo.toml).
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+
+# Names written as they are spelt, not code, in doc comments (".." keeps Clippy's own list).
+doc-valid-idents = ["FFmpeg", "FFprobe", "dBFS", "x264", "H.264", ".."]

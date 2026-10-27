@@ -1,0 +1,26 @@
+# typos checks spelling in code and docs, in UK English. Every allowed word below says why it is
+# allowed. FFmpeg's own names (zoompan, anoisesrc, framemd5, color_range…) need no entry today.
+
+[default]
+locale = "en-gb"
+# Other software's names, matched in context so the same words in prose are still checked: `ps -ax`
+# (scripts/process.ts).
+extend-ignore-re = ['"-ax"']
+
+[default.extend-words]
+# Names other software fixes: serde's Serialize (and `skip_serializing_if`), the sha2 crate's
+# `finalize`.
+serialize = "serialize"
+serializing = "serializing"
+finalize = "finalize"
+# `analyze_audio` and its module keep manuzio's names, so that manuzio's calls stay the same.
+analyze = "analyze"
+
+[files]
+extend-exclude = [
+  "*.lock",
+  # The CC0 legal code, as Creative Commons publishes it.
+  "LICENSE",
+  # Pinned references: argument lists and hashes recorded from manuzio, compared exactly.
+  "crates/parity/references/",
+]

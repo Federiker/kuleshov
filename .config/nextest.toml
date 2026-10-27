@@ -1,0 +1,13 @@
+# cargo-nextest settings (`mise run test` locally, `--profile ci` in CI).
+
+[profile.default]
+slow-timeout = { period = "30s" }
+
+[profile.ci]
+# In CI only: retry a failing test once, so a rare timing failure is reported as flaky rather
+# than failing the run; keep going after a failure; write JUnit results for the run's artefacts.
+retries = 1
+fail-fast = false
+
+[profile.ci.junit]
+path = "junit.xml"

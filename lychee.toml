@@ -1,0 +1,5 @@
+# lychee checks the links in the Markdown docs (`mise run links`). Offline: only links within the
+# repository, so a site being down never fails a check; links to headings (#fragments) are checked
+# too.
+offline = true
+include_fragments = "full"

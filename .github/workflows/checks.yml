@@ -1,0 +1,85 @@
+name: Checks
+
+# Pushes to main and every pull request run the checks on Linux (a branch with a pull request runs
+# once); a manual run chooses the platforms. Only Windows and Linux: they are the platforms with a
+# pinned FFmpeg build and parity references (docs/parity.md). Security advisories run weekly in
+# advisories.yml, so a new advisory never fails an unrelated push.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platforms to check
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - windows
+          - linux
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request cancels its older run; manual runs are kept.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  checks:
+    name: Checks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Linux for pushes and pull requests; the chosen platforms for a manual run.
+        os: >-
+          ${{ fromJSON(
+            github.event_name != 'workflow_dispatch' && '["ubuntu-latest"]' ||
+            inputs.platform == 'windows' && '["windows-latest"]' ||
+            inputs.platform == 'linux' && '["ubuntu-latest"]' ||
+            '["windows-latest", "ubuntu-latest"]'
+          ) }}
+    steps:
+      - uses: actions/checkout@v4
+      # The tools pinned in mise.toml; `mise run` runs its tasks (`mise run ci` runs these steps locally).
+      - uses: jdx/mise-action@v5
+      # The Rust toolchain pinned in rust-toolchain.toml.
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      # The scripts' packages (Biome, TypeScript), exactly as bun.lock has them.
+      - run: bun install --frozen-lockfile
+      # FFmpeg for the tests: the pinned build (scripts/downloads.ts), downloaded once per platform
+      # and checksum verified, then restored from the cache until the pin changes.
+      - name: Restore the staged FFmpeg
+        uses: actions/cache@v4
+        with:
+          path: tools
+          key: ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/downloads.ts', 'scripts/tools.ts') }}
+      - run: mise run tools
+      # Quick checks first.
+      - run: mise run fmt
+      - run: mise run spell
+      - run: mise run links
+      - run: mise run machete
+      - run: mise run deny
+      - run: mise run typecheck
+      - run: mise run scripts:test
+      # Then the build and the tests.
+      - run: mise run clippy
+      # The library also builds with the tokio feature (the async variants).
+      - run: mise run check
+      # The tests, the parity test with them, with coverage at 80% or more (KULESHOV_TOOLS_DIR is
+      # tools/, from mise.toml). nextest does not run doctests: they run next.
+      - run: mise run coverage -- --profile ci
+      - run: cargo test --workspace --all-features --doc
+      - name: Keep the test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tests-${{ matrix.os }}
+          path: target/llvm-cov-target/nextest/ci/junit.xml
+          if-no-files-found: ignore

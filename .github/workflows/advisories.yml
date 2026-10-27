@@ -1,0 +1,21 @@
+name: Advisories
+
+# Known vulnerabilities in the Rust crates (cargo-deny, RustSec), weekly and on demand. Kept out of
+# the Checks workflow so a new advisory never fails an unrelated push.
+on:
+  schedule:
+    # Mondays at 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  advisories:
+    name: Advisories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v5
+      - run: cargo deny check advisories

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Weekly, grouped dependency updates, as in jespersen and jerome.",
+    "The pinned FFmpeg builds (scripts/downloads.ts) are never updated here: no manager reads them, and the parity references (crates/parity/references) belong to those exact builds, so changing one is a decision for the owner (docs/parity.md)."
+  ],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "7 days",
+  "commitMessagePrefix": "[deps]",
+  "commitMessageLowerCase": "never",
+  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  },
+  "packageRules": [
+    {
+      "groupName": "Rust minor and patch updates",
+      "matchManagers": ["cargo"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "Scripts' packages (Bun)",
+      "matchManagers": ["bun"]
+    },
+    {
+      "groupName": "Developer tools (mise)",
+      "matchManagers": ["mise"]
+    },
+    {
+      "groupName": "GitHub Actions",
+      "matchManagers": ["github-actions"]
+    }
+  ]
+}

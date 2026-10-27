@@ -1,0 +1,33 @@
+{
+  "editor.formatOnSave": true,
+  "editor.rulers": [120],
+  "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" },
+  "[markdown]": { "editor.formatOnSave": false, "editor.rulers": [80] },
+  "[toml]": { "editor.defaultFormatter": "tombi-toml.tombi" },
+  "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
+
+  // Rust: Clippy on save; rust-analyzer builds in its own folder (target/rust-analyzer)
+  // so it never blocks or invalidates `cargo build` and `cargo test`.
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.cargo.targetDir": true,
+
+  // Keep build outputs and scratch data out of search and the file watcher.
+  "search.exclude": {
+    "**/target": true,
+    "tmp": true,
+    "tools": true,
+    "node_modules": true,
+    "Cargo.lock": true,
+    "bun.lock": true
+  },
+  "files.watcherExclude": {
+    "**/target/**": true,
+    "tmp/**": true,
+    "tools/**": true,
+    "**/node_modules/**": true
+  },
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true
+}

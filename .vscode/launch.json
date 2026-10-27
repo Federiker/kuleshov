@@ -1,0 +1,46 @@
+{
+  // Built with the `debugging` profile (full debug info, in target/debugging), so debugging does
+  // not invalidate the lighter everyday dev build. The tests find FFmpeg through
+  // KULESHOV_TOOLS_DIR (mise.toml, or mise.local.toml on this machine).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tests: one crate (CodeLLDB)",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--profile=debugging",
+          "--package=${input:crate}"
+        ],
+        "filter": { "kind": "${input:kind}" }
+      },
+      "args": ["${input:testFilter}"],
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "crate",
+      "type": "pickString",
+      "description": "Crate whose tests to debug",
+      "options": ["kuleshov", "kuleshov_parity"],
+      "default": "kuleshov"
+    },
+    {
+      "id": "kind",
+      "type": "pickString",
+      "description": "Unit tests (lib) or integration tests (test)",
+      "options": ["lib", "test"],
+      "default": "lib"
+    },
+    {
+      "id": "testFilter",
+      "type": "promptString",
+      "description": "Test name filter (empty runs them all)",
+      "default": ""
+    }
+  ]
+}
