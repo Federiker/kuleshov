@@ -23,7 +23,8 @@ For each scenario the reference holds:
 
 - **the calls:** every `ffmpeg` and `ffprobe` run, with its arguments in order
   and the contents of the concat lists among them. A recording shim
-  ([kuleshov-record](../crates/parity/src/bin/kuleshov-record.rs)), copied as
+  ([kuleshov-record](../crates/parity/src/bin/kuleshov-record.rs), the
+  library's [`Shim`](../crates/parity/src/shim.rs)), copied as
   `ffmpeg` and `ffprobe` into a folder that the code under test takes for its
   tools folder (`MNZ_TOOLS_DIR` on manuzio's side, `Tools::find_in` here), logs
   them and runs the real program with the same arguments and standard streams;

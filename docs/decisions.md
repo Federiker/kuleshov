@@ -104,3 +104,11 @@ undoing one.
     through zip with zlib-rs, tar.xz through lzma-rust2 and tar, all pure Rust
     but ring. webpki-roots' CDLA-Permissive-2.0 is allowed, as in manuzio and
     jerome, and cargo-deny now checks every feature.
+24. **The recording shim is a library type**, `kuleshov_parity::Shim`, so
+    that a crate built on kuleshov records with it instead of a copy
+    (owner's decision, asked for by melies): `kuleshov-record` is
+    `Shim { name: "kuleshov-record", wavs: false }.run()`. With `wavs`, a
+    recorder also records each WAV among the arguments, or named in a concat
+    list, by size and SHA-256 under the call's `lists`, as melies does for the
+    chapter WAV it deletes once the MP3 is made. kuleshov's own recorder does
+    not, so its calls and references stand.
