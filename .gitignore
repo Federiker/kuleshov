@@ -1,0 +1,28 @@
+# Rust
+target/
+
+# Local editor / OS files
+.DS_Store
+Thumbs.db
+# Shared VS Code settings are tracked; anything else there stays personal.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+
+# Local experiments, the reference harness and disposable scripts (AGENTS.md)
+/tmp/
+
+# FFmpeg staged by `mise run tools`: downloaded, never committed
+/tools/
+
+# Machine-local settings, such as KULESHOV_TOOLS_DIR (AGENTS.md)
+mise.local.toml
+
+# Bun
+node_modules/
+
+# Test coverage reports
+/coverage/
+lcov.info

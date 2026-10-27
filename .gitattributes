@@ -1,0 +1,31 @@
+# Normalise text in Git and use LF on every platform, independent of core.autocrlf.
+* text=auto eol=lf
+
+# Windows command scripts require CRLF; PowerShell and shell scripts use LF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=lf
+*.sh text eol=lf
+
+# Language data is kept as reviewable text; its compact binary form is built, never committed.
+*.md text diff
+*.json text
+*.toml text
+*.tsv text
+*.txt text
+*.yml text
+*.lock text
+
+# Upstream data stays byte for byte as published (its SHA-256 is pinned in
+# data/upstream/sources.toml), CRLF included; it still diffs as text.
+data/upstream/** -text diff
+data/upstream/**/*.md text eol=lf
+data/upstream/sources.toml text eol=lf
+
+# Archives and audio are never converted. (No Git LFS yet: add it before the first large binary.)
+*.zip binary
+*.gz binary
+*.xz binary
+*.zst binary
+*.wav binary
+*.flac binary
