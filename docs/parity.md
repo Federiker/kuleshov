@@ -117,7 +117,9 @@ FFmpeg (`assets/tools`, the Windows reference build on its development
 machine), from a checkout of kuleshov at that commit:
 
 ```sh
-KULESHOV_TOOLS_DIR=../manuzio/assets/tools cargo test -p kuleshov_parity
+KULESHOV_TOOLS_DIR="$PWD/../manuzio/assets/tools" cargo test -p kuleshov_parity
 ```
 
-It must pass, with no change to the references.
+The folder must be an absolute path: Cargo runs the test from `crates/parity`, so a relative one is
+read from there. It must pass, with no change to the references (manuzio's switch, 28 October 2026:
+it passed at v0.1.0 with manuzio's staged Windows build).

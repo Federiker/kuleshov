@@ -63,6 +63,16 @@ fn every_function_calls_ffmpeg_and_writes_what_manuzio_did() {
             "KULESHOV_TOOLS_DIR names the folder with the FFmpeg build of the references \
 (`mise run tools` stages it)",
         );
+    // Without this, a wrong folder fails later as a missing output of an earlier scenario.
+    for tool in [kuleshov::Tool::Ffmpeg, kuleshov::Tool::Ffprobe] {
+        assert!(
+            tools.join(tool.file_name()).is_file(),
+            "KULESHOV_TOOLS_DIR={} holds no {tool}; Cargo runs this test from {}, so a relative \
+path is read from there: give an absolute one",
+            tools.display(),
+            manifest_dir().display()
+        );
+    }
     let work = std::env::temp_dir().join(format!("kuleshov-parity-{}", std::process::id()));
     let mut s = Session::new(&recorder(), &tools, &work).unwrap();
     let t = &Tools::find_in([s.shim()]);
