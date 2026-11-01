@@ -154,6 +154,11 @@ run with any recent FFmpeg.
 | `mise run ci` | Everything CI runs |
 | `mise run tag` | Sets the version, commits it, tags `v<version>` and pushes |
 
+The GitHub Actions workflows run only when started by hand, under Actions on
+GitHub: Checks, on Windows, Linux or both, and Advisories, for known
+vulnerabilities in the Rust crates. Nothing runs on a push, on a pull request
+or on a schedule.
+
 ## Releasing
 
 A release is the tag `v<version>` on `main`, with the version set once in the
@@ -199,7 +204,7 @@ batch/command scripts.
 - **before a push**, Clippy (`mise run clippy`) and the scripts' type check
   (`mise run typecheck`).
 
-`git commit --no-verify` skips them; CI runs the same checks anyway.
+`git commit --no-verify` skips them; `mise run ci` runs the same checks.
 
 ### Commit messages
 

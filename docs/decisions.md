@@ -40,9 +40,9 @@ is not argued again without a reason.
    build, so each platform has references for its own build.
 10. **Every test runs by default**, those manuzio kept in its `engine` tier
     included: FFmpeg is what this library is about, and CI stages it anyway.
-11. **CI** checks Linux on pushes and pull requests, and Windows (or both) on
-    manual runs. No macOS: there is no pinned FFmpeg build for it, in manuzio
-    either.
+11. **CI** runs only when started by hand, on Windows, Linux or both, with the
+    advisories as a workflow of their own. No macOS: there is no pinned FFmpeg
+    build for it, in manuzio either.
 12. **FFmpeg for the tests** comes from `KULESHOV_TOOLS_DIR`, a test-only
     variable: `tools/` staged by `mise run tools` by default, or a folder set
     in the gitignored `mise.local.toml`, such as manuzio's staged copy.

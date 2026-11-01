@@ -7,8 +7,8 @@ the same output ([docs/parity.md](docs/parity.md)).
 ## Foundation
 
 - [ ] Repository (the owner creates `Federiker/kuleshov` and pushes by hand):
-  - [ ] Checks green on Linux (a push) and Windows (a manual run), once it is
-    on GitHub. Locally `mise run ci` passes on Windows, and the tests and the
+  - [ ] Checks green on Linux and Windows (a manual run), once it is on
+    GitHub. Locally `mise run ci` passes on Windows, and the tests and the
     parity test pass on Linux (WSL, the 7.0.2 build, cross-compiled binaries).
 - [ ] FFmpeg downloaded on request (`download` feature,
   [decisions 21–23](docs/decisions.md#after-the-port-27-october-2026)):

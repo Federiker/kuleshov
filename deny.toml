@@ -1,7 +1,7 @@
 # cargo-deny: licences, bans, sources and security advisories for the Rust dependencies.
-# `mise run audit` runs every check; CI runs licences, bans and sources on every push and the
-# advisories weekly. FFmpeg is not a dependency: callers supply it, and its builds keep their own
-# licences (README, "FFmpeg").
+# `mise run audit` runs every check; in CI, started by hand, the Checks workflow runs licences, bans
+# and sources and the Advisories workflow the advisories. FFmpeg is not a dependency: callers supply
+# it, and its builds keep their own licences (README, "FFmpeg").
 
 [graph]
 # Optional features count too: the `download` feature's dependencies are checked like the rest.

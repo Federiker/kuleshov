@@ -1,5 +1,5 @@
 # Git hooks, installed by scripts/install.sh / install.bat (`lefthook install`). Skip once with
-# `git commit --no-verify` only when you mean to; CI runs the same checks.
+# `git commit --no-verify` only when you mean to; `mise run ci` runs the same checks.
 
 pre-commit:
   parallel: true
