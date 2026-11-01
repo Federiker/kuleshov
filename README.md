@@ -104,6 +104,19 @@ not part of it and keeps its own licence.
 
 ## Setup
 
+After cloning, one command takes the clone to a tested state (Bash; on Windows,
+from Git Bash):
+
+```sh
+./new-folder-who-dis.sh --with-ffmpeg    # --help for the steps; --with-build-tools, --skip-ci
+```
+
+In order, it runs `scripts/install.sh` (below), checks the C and C++ build tools
+(installed only with `--with-build-tools`: a few GB on Windows), checks FFmpeg
+for the tests (downloaded only with `--with-ffmpeg`: 114 MB on Windows, 41 MB on
+Linux x64) and runs `mise run ci` (only `mise run check` with `--skip-ci`). It is
+safe to run again, and says which step stopped it and why.
+
 On a new machine, `scripts/install.sh` (macOS, Linux, Git Bash) or
 `scripts\install.bat` (Windows) installs mise and the pinned tools
 ([mise.toml](mise.toml)), the Rust toolchain
