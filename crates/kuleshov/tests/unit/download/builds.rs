@@ -12,6 +12,8 @@ fn windows_and_linux_have_pinned_builds_and_macos_has_none() {
         let linux = FfmpegBuild::pinned_for("linux", arch).unwrap();
         assert!(linux.url.contains("7.0.2") && linux.url.ends_with("-static.tar.xz"));
     }
+    // Windows on arm64 takes the x64 build, which it runs through its emulation.
+    assert_eq!(FfmpegBuild::pinned_for("windows", "aarch64"), Some(windows));
     assert_eq!(FfmpegBuild::pinned_for("macos", "aarch64"), None);
     assert_eq!(
         FfmpegBuild::pinned(),

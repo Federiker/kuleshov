@@ -31,9 +31,16 @@ impl FfmpegBuild {
     }
 
     /// The build pinned for `os` and `arch`, named as [`std::env::consts`] names them
-    /// (`windows`, `linux`; `x86_64`, `aarch64`).
+    /// (`windows`, `linux`; `x86_64`, `aarch64`). Windows on arm64 takes the x64 build, which
+    /// it runs through its emulation: the parity references belong to that build, and the
+    /// native arm64 builds for Windows are rolling ones, not pinned releases.
     #[must_use]
     pub fn pinned_for(os: &str, arch: &str) -> Option<Self> {
+        let arch = if (os, arch) == ("windows", "aarch64") {
+            "x86_64"
+        } else {
+            arch
+        };
         let builds: BTreeMap<String, serde_json::Value> = serde_json::from_str(MANIFEST).ok()?;
         serde_json::from_value(builds.get(&format!("{os}-{arch}"))?.clone()).ok()
     }
