@@ -240,7 +240,7 @@ dependencies = [
 
 [[package]]
 name = "kuleshov"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "lzma-rust2",
  "serde",
@@ -255,7 +255,7 @@ dependencies = [
 
 [[package]]
 name = "kuleshov_parity"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kuleshov",
  "serde",
@@ -266,7 +266,7 @@ dependencies = [
 
 [[package]]
 name = "kuleshov_tag"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "libc"
