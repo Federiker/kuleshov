@@ -212,13 +212,13 @@ describe("pinned FFmpeg downloads", () => {
     [
       "linux",
       "x64",
-      "https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-amd64-static.tar.xz",
+      "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/01154482929c8a31d12f2428e44a6b1dd49e042f/ffmpeg/ffmpeg-7.0.2-amd64-static.tar.xz",
       "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67",
     ],
     [
       "linux",
       "arm64",
-      "https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-arm64-static.tar.xz",
+      "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/01154482929c8a31d12f2428e44a6b1dd49e042f/ffmpeg/ffmpeg-7.0.2-arm64-static.tar.xz",
       "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1",
     ],
   ] as const)("pins FFmpeg for %s-%s", (host, arch, url, sha256) => {
