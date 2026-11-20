@@ -112,3 +112,17 @@ undoing one.
     list, by size and SHA-256 under the call's `lists`, as melies does for the
     chapter WAV it deletes once the MP3 is made. kuleshov's own recorder does
     not, so its calls and references stand.
+
+## Downloads that survive a bad moment (20 November 2026)
+
+25. **Mirrors and retries** (owner's decision, after a user's install ended
+    on one failed name lookup, `os error 11002`): a manifest entry may list
+    `mirrors`, copies of the same archive with the same SHA-256, tried in
+    order after its `url`. Each source gets three attempts, a second and then
+    three seconds apart, when it fails for a passing reason (the name or the
+    connection, a timeout, a cut-off body, HTTP 429 or 5xx); another 4xx or
+    other bytes move on to the next source at once, and a cancel stops the
+    wait. When all fail, `Error::Download` names the first URL and its reason,
+    then each other source tried with its own. A folder's pair is kept while
+    its record has the pinned SHA-256, wherever the archive was served from,
+    so reordering or adding sources downloads nothing again.

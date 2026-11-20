@@ -45,8 +45,29 @@ parity references belong to; Windows on arm64 takes
 the x64 build, which it runs through its emulation; none on macOS.
 [`examples/install_ffmpeg.rs`](crates/kuleshov/examples/install_ffmpeg.rs) shows
 the call. `Tools::find_or_download_build` takes a build of the program's choosing
-instead. Both pinned builds are GPL-3.0: whether a program offers them to its
+instead (`FfmpegBuild::new(url, sha256)`, with `.with_mirrors([..])` for other
+copies). Both pinned builds are GPL-3.0: whether a program offers them to its
 users, and how, is that program's decision.
+
+A build may be served from more than one place. Its manifest entry lists other
+copies of the same archive, with the same SHA-256, in an optional `mirrors`
+array, tried in order after `url` (an entry without one is read as before):
+
+```json
+"windows-x86_64": {
+  "url": "https://first.example/ffmpeg-9.0.2-essentials_build.zip",
+  "mirrors": ["https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip"],
+  "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba"
+}
+```
+
+Each source is tried up to three times, a second and then three seconds apart,
+when it fails for a passing reason (the name or the connection, a timeout, a
+body cut off, HTTP 429 or 5xx); another 4xx or other bytes move on to the next
+source at once, and cancelling stops the wait. When every source fails, the
+`Download` error names the first URL and its reason, then each other source
+tried with its own. A pair already installed is kept while its record has the
+pinned SHA-256, wherever it was downloaded from.
 
 ```rust
 use kuleshov::{CombineOptions, Mp3Encoding, Tool, Tools, combine_audio_files_with_options};

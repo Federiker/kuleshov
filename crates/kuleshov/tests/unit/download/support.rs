@@ -12,6 +12,17 @@ use std::{
     thread,
 };
 
+/// What the server answers to one request.
+#[derive(Clone)]
+pub(crate) enum Reply {
+    /// 200 with these bytes.
+    Body(Arc<Vec<u8>>),
+    /// The status alone, with an empty body.
+    Status(u16),
+    /// 200 announcing these bytes, but the connection closes halfway through them.
+    Cut(Arc<Vec<u8>>),
+}
+
 /// A server on this machine that answers `GET /<name>` with the bytes of `name`, and 404 otherwise.
 pub(crate) struct Server {
     base: String,
@@ -20,10 +31,22 @@ pub(crate) struct Server {
 
 impl Server {
     pub(crate) fn new(files: Vec<(&'static str, Arc<Vec<u8>>)>) -> Self {
+        Self::scripted(
+            files
+                .into_iter()
+                .map(|(name, body)| (name, vec![Reply::Body(body)]))
+                .collect(),
+        )
+    }
+
+    /// A server that answers the requests for each name with its replies in turn, the last one
+    /// again once they run out; and 404 for other names.
+    pub(crate) fn scripted(routes: Vec<(&'static str, Vec<Reply>)>) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let base = format!("http://{}", listener.local_addr().unwrap());
         let requests = Arc::new(AtomicUsize::new(0));
         let counter = requests.clone();
+        let mut asked = vec![0usize; routes.len()];
         thread::spawn(move || {
             for stream in listener.incoming() {
                 let Ok(mut stream) = stream else { continue };
@@ -41,16 +64,33 @@ impl Server {
                     .nth(1)
                     .unwrap_or("/")
                     .trim_start_matches('/');
-                let _ = match files.iter().find(|(name, _)| *name == path) {
-                    Some((_, body)) => write!(
+                let reply = match routes.iter().position(|(name, _)| *name == path) {
+                    Some(index) => {
+                        let replies = &routes[index].1;
+                        let reply = replies[asked[index].min(replies.len() - 1)].clone();
+                        asked[index] += 1;
+                        reply
+                    }
+                    None => Reply::Status(404),
+                };
+                let _ = match reply {
+                    Reply::Body(body) => write!(
                         stream,
                         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
                         body.len()
                     )
-                    .and_then(|()| stream.write_all(body)),
-                    None => stream.write_all(
-                        b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+                    .and_then(|()| stream.write_all(&body)),
+                    Reply::Status(code) => write!(
+                        stream,
+                        "HTTP/1.1 {code} Status {code}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
                     ),
+                    Reply::Cut(body) => write!(
+                        stream,
+                        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                        body.len()
+                    )
+                    .and_then(|()| stream.write_all(&body[..body.len() / 2]))
+                    .and_then(|()| stream.flush()),
                 };
             }
         });

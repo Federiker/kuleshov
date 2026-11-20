@@ -40,16 +40,23 @@ impl Tools {
     ///
     /// A pair already in `dir` is kept: one put there by hand always, one installed from a build
     /// (recorded in `download.json`, as `mise run tools` records it) while that build is still
-    /// `build`; otherwise `build` is downloaded, its SHA-256 checked, and only `ffmpeg` and
-    /// `ffprobe` are taken out of it. `progress` gets the bytes received and the total, when the
-    /// server gives it. The pair in place is replaced only once the new one is complete, so a
+    /// `build`'s archive (the same SHA-256, wherever it was served from); otherwise `build` is
+    /// downloaded, its SHA-256 checked, and only `ffmpeg` and `ffprobe` are taken out of it.
+    ///
+    /// The archive comes from the build's URL, then from each of its mirrors in turn. A source
+    /// that fails for a passing reason (the name or the connection, a timeout, a cut-off body,
+    /// HTTP 429 or 5xx) is tried up to three times, a second and then three seconds apart; one
+    /// that refuses it (another 4xx) or serves other bytes is left for the next at once.
+    /// `progress` gets the bytes received and the total, when the server gives it, starting
+    /// again from zero with each attempt. The pair in place is replaced only once the new one is complete, so a
     /// failed or cancelled download leaves it, and nothing else, behind. Both programs must then
     /// run (`-version`).
     ///
     /// Nothing else in kuleshov downloads: call this where the program may use the network.
     ///
     /// # Errors
-    /// [`Error::Download`] when the server, the checksum or the archive fail,
+    /// [`Error::Download`] when the server, the checksum or the archive fail (every source, each
+    /// named with its last reason),
     /// [`Error::InvalidInput`] for a malformed checksum, [`Error::Io`], [`Error::Cancelled`], and
     /// [`Error::Run`] or [`Error::Failed`] when a program does not run.
     pub fn find_or_download_build(
@@ -63,7 +70,7 @@ impl Tools {
             .ok()
             .and_then(|text| serde_json::from_str::<FfmpegBuild>(&text).ok());
         let present = paths.iter().all(|path| path.is_file());
-        if !present || record.is_some_and(|record| record != *build) {
+        if !present || record.is_some_and(|record| !record.same_archive(build)) {
             install(dir, build, &paths, &mut progress, cancel)?;
         }
         for path in &paths {

@@ -4,7 +4,7 @@
 import { existsSync } from "node:fs";
 import { chmod, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ffmpegDownload, installArchive } from "./downloads.ts";
+import { ffmpegDownload, installDownload } from "./downloads.ts";
 import { available } from "./process.ts";
 
 export function executable(name: string): string {
@@ -42,22 +42,17 @@ async function stageMedia(root: string): Promise<void> {
     (text) => JSON.parse(text) as Partial<typeof download>,
     () => undefined,
   );
+  // The same archive (its SHA-256), wherever it is served from, as the library compares them.
   const outdated =
     record !== undefined &&
-    (record.url !== download.url || record.sha256 !== download.sha256);
+    record.sha256?.toLowerCase() !== download.sha256.toLowerCase();
   if (outdated) {
     console.log(`The pinned FFmpeg changed: replacing ${out}`);
     for (const path of [...staged, join(out, RECORD)])
       await rm(path, { force: true });
   }
   if (!staged.every(existsSync)) {
-    await installArchive(
-      root,
-      download.url,
-      out,
-      MEDIA.map(executable),
-      download.sha256,
-    );
+    await installDownload(root, download, out, MEDIA.map(executable));
     await writeFile(
       join(out, RECORD),
       `${JSON.stringify(download, null, 2)}\n`,

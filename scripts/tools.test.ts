@@ -30,7 +30,9 @@ const run =
   >();
 const available = mock<(command: string, args?: string[]) => boolean>();
 mock.module("./process.ts", () => ({ run, available }));
-const { ffmpegDownload, installArchive } = await import("./downloads.ts");
+const { ffmpegDownload, installArchive, installDownload } = await import(
+  "./downloads.ts"
+);
 const { executable, prepareMedia } = await import("./tools.ts");
 
 const bytes = Buffer.from("synthetic archive");
@@ -198,6 +200,44 @@ describe("verified tool archive installation", () => {
     ).rejects.toThrow("missing-ffprobe missing");
     expect(existsSync(destination)).toBe(false);
     expect(await readdir(join(root, "tmp", "downloads"))).toEqual([]);
+  });
+
+  it("falls back to each mirror in turn, and names every source when all fail", async () => {
+    const download = {
+      url: "https://first.test/tools.zip",
+      sha256: checksum,
+      mirrors: [
+        "https://second.test/tools.zip",
+        "https://third.test/tools.zip",
+      ],
+    };
+    fetcher.mockImplementation(async (input) =>
+      String(input).startsWith("https://third.test")
+        ? new Response(bytes)
+        : new Response("unavailable", { status: 503 }),
+    );
+    await installDownload(root, download, destination, ["ffmpeg"]);
+    expect(fetcher.mock.calls.map(([input]) => String(input))).toEqual([
+      download.url,
+      ...download.mirrors,
+    ]);
+    expect(await readFile(join(destination, "ffmpeg"), "utf8")).toBe(
+      "synthetic ffmpeg",
+    );
+
+    fetcher.mockImplementation(
+      async () => new Response("unavailable", { status: 503 }),
+    );
+    const failure = installDownload(
+      root,
+      { ...download, mirrors: download.mirrors.slice(0, 1) },
+      join(root, "elsewhere"),
+      ["ffmpeg"],
+    );
+    await expect(failure).rejects.toThrow(
+      `Every source failed: ${download.url}: Download failed: HTTP 503 (${download.url}); ${download.mirrors[0]}: Download failed: HTTP 503 (${download.mirrors[0]})`,
+    );
+    expect(existsSync(join(root, "elsewhere"))).toBe(false);
   });
 });
 

@@ -4,13 +4,13 @@ use std::sync::Arc;
 
 /// A ZIP of the real ffmpeg and ffprobe the tests run (`KULESHOV_TOOLS_DIR`), laid out as the
 /// pinned Windows build is, so that the installed pair must really run.
-fn real_build() -> Arc<Vec<u8>> {
+fn real_build(top: &str) -> Arc<Vec<u8>> {
     let dir = std::env::var_os("KULESHOV_TOOLS_DIR")
         .map(PathBuf::from)
         .expect("KULESHOV_TOOLS_DIR names the folder with ffmpeg and ffprobe");
     let programs = [Tool::Ffmpeg, Tool::Ffprobe].map(|tool| {
         (
-            format!("ffmpeg-9/bin/{}", tool.file_name()),
+            format!("{top}/bin/{}", tool.file_name()),
             fs::read(dir.join(tool.file_name())).unwrap(),
         )
     });
@@ -32,9 +32,13 @@ fn names(dir: &Path) -> Vec<String> {
 
 #[test]
 fn a_build_is_installed_once_kept_while_pinned_and_replaced_when_the_pin_changes() {
-    let archive = real_build();
+    let archive = real_build("ffmpeg-9");
+    let newer = real_build("ffmpeg-9.1");
     let checksum = sha256(&archive);
-    let server = Server::new(vec![("ff.zip", archive.clone()), ("ff2.zip", archive)]);
+    let server = Server::new(vec![
+        ("ff.zip", archive.clone()),
+        ("ff2.zip", newer.clone()),
+    ]);
     let dir = scratch("install").join("tools");
     let build = FfmpegBuild::new(server.url("ff.zip"), checksum.clone());
     let expected = {
@@ -74,21 +78,26 @@ fn a_build_is_installed_once_kept_while_pinned_and_replaced_when_the_pin_changes
     Tools::find_or_download_build(&dir, &build, |_, _| {}, None).unwrap();
     assert_eq!(server.requests(), 1);
 
-    // Another pin: replaced.
-    let other = FfmpegBuild::new(server.url("ff2.zip"), checksum);
+    // The same archive served from elsewhere first, or with a mirror more: still kept.
+    let moved = FfmpegBuild::new(server.url("moved.zip"), checksum.to_uppercase())
+        .with_mirrors([server.url("ff.zip")]);
+    Tools::find_or_download_build(&dir, &moved, |_, _| {}, None).unwrap();
+    assert_eq!(server.requests(), 1);
+
+    // Another pin: replaced, from its mirror when its URL fails.
+    let other = FfmpegBuild::new(server.url("gone.zip"), sha256(&newer))
+        .with_mirrors([server.url("ff2.zip")]);
     Tools::find_or_download_build(&dir, &other, |_, _| {}, None).unwrap();
-    assert_eq!(server.requests(), 2);
+    assert_eq!(server.requests(), 3);
     assert_eq!(names(&dir), expected);
-    assert!(
-        fs::read_to_string(dir.join(RECORD))
-            .unwrap()
-            .contains("ff2.zip")
-    );
+    let record: FfmpegBuild =
+        serde_json::from_str(&fs::read_to_string(dir.join(RECORD)).unwrap()).unwrap();
+    assert_eq!(record, other);
 
     // A pair without a record was put there by hand: kept, whatever the pin.
     fs::remove_file(dir.join(RECORD)).unwrap();
     Tools::find_or_download_build(&dir, &build, |_, _| {}, None).unwrap();
-    assert_eq!(server.requests(), 2);
+    assert_eq!(server.requests(), 3);
 
     fs::remove_dir_all(dir.parent().unwrap()).unwrap();
 }

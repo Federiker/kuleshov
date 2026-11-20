@@ -95,6 +95,33 @@ export async function installArchive(
 export interface ToolDownload {
   url: string;
   sha256: string;
+  /** Other copies of the same archive, tried in order after `url`. */
+  mirrors?: string[];
+}
+
+/**
+ * {@link installArchive} from the download's URL, then from each mirror in turn until one
+ * succeeds. When every one fails, the error names each with its reason.
+ */
+export async function installDownload(
+  root: string,
+  download: ToolDownload,
+  destination: string,
+  names: string[],
+): Promise<void> {
+  const sources = [download.url, ...(download.mirrors ?? [])];
+  const failures: string[] = [];
+  for (const url of sources) {
+    try {
+      await installArchive(root, url, destination, names, download.sha256);
+      return;
+    } catch (error) {
+      if (sources.length === 1) throw error;
+      const reason = error instanceof Error ? error.message : String(error);
+      failures.push(`${url}: ${reason}`);
+    }
+  }
+  throw new Error(`Every source failed: ${failures.join("; ")}`);
 }
 
 /** The pinned builds, shared with the library's `download` feature (one manifest, one place). */
@@ -119,7 +146,11 @@ export function ffmpegDownload(
 ): ToolDownload {
   const build = builds[buildKey(platform, arch)];
   if (typeof build === "object")
-    return { url: build.url, sha256: build.sha256 };
+    return {
+      url: build.url,
+      sha256: build.sha256,
+      ...(build.mirrors?.length ? { mirrors: build.mirrors } : {}),
+    };
   throw new Error(
     `Supply matching ffmpeg and ffprobe in tools/ for ${platform}-${arch}, or point KULESHOV_TOOLS_DIR at them; automatic downloads are not available.`,
   );
