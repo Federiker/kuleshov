@@ -246,23 +246,35 @@ describe("pinned FFmpeg downloads", () => {
     [
       "win32",
       "x64",
-      "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
-      "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+      {
+        url: "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/9abadf2fcb188495fa3b70d5a8e4529259ea8d2f/ffmpeg/ffmpeg-9.0.2-essentials_build.zip",
+        mirrors: [
+          "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+        ] as string[],
+        sha256:
+          "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+      },
     ],
     [
       "linux",
       "x64",
-      "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/01154482929c8a31d12f2428e44a6b1dd49e042f/ffmpeg/ffmpeg-7.0.2-amd64-static.tar.xz",
-      "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67",
+      {
+        url: "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/01154482929c8a31d12f2428e44a6b1dd49e042f/ffmpeg/ffmpeg-7.0.2-amd64-static.tar.xz",
+        sha256:
+          "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67",
+      },
     ],
     [
       "linux",
       "arm64",
-      "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/01154482929c8a31d12f2428e44a6b1dd49e042f/ffmpeg/ffmpeg-7.0.2-arm64-static.tar.xz",
-      "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1",
+      {
+        url: "https://huggingface.co/datasets/Freonius/jerome-sources/resolve/01154482929c8a31d12f2428e44a6b1dd49e042f/ffmpeg/ffmpeg-7.0.2-arm64-static.tar.xz",
+        sha256:
+          "f4149bb2b0784e30e99bdda85471c9b5930d3402014e934a5098b41d0f7201b1",
+      },
     ],
-  ] as const)("pins FFmpeg for %s-%s", (host, arch, url, sha256) => {
-    expect(ffmpegDownload(host, arch)).toEqual({ url, sha256 });
+  ] as const)("pins FFmpeg for %s-%s", (host, arch, download) => {
+    expect(ffmpegDownload(host, arch)).toEqual(download);
   });
 
   it("keeps unsupported targets on the explicit supplied-binary path", () => {

@@ -39,8 +39,9 @@ SHA-256, takes only the two programs out of the archive and checks that they
 run. Nothing else in kuleshov touches the network. The pinned builds are in
 [ffmpeg-builds.json](crates/kuleshov/ffmpeg-builds.json): gyan.dev's 9.0.2
 essentials build on Windows x64, johnvansickle's 7.0.2 static builds on Linux
-x64 and arm64 (served from a copy on Hugging Face, `Freonius/jerome-sources`
-pinned by commit, as johnvansickle.com moves older builds away), the builds the
+x64 and arm64 (all served from a copy on Hugging Face, `Freonius/jerome-sources`
+pinned by commit: johnvansickle.com moves older builds away, and the Windows
+build falls back to www.gyan.dev when the copy cannot be reached), the builds the
 parity references belong to; Windows on arm64 takes
 the x64 build, which it runs through its emulation; none on macOS.
 [`examples/install_ffmpeg.rs`](crates/kuleshov/examples/install_ffmpeg.rs) shows

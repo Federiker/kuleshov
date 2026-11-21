@@ -8,6 +8,16 @@ fn windows_and_linux_have_pinned_builds_and_macos_has_none() {
         windows.url.contains("9.0.2-essentials")
             && Path::new(&windows.url).extension() == Some("zip".as_ref())
     );
+    // The Windows zip comes from its copy on Hugging Face first, then from gyan.dev.
+    assert!(
+        windows
+            .url
+            .starts_with("https://huggingface.co/datasets/Freonius/jerome-sources/resolve/")
+    );
+    assert_eq!(
+        windows.mirrors,
+        ["https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip"]
+    );
     for arch in ["x86_64", "aarch64"] {
         let linux = FfmpegBuild::pinned_for("linux", arch).unwrap();
         assert!(linux.url.contains("7.0.2") && linux.url.ends_with("-static.tar.xz"));
